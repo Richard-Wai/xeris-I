@@ -17,7 +17,7 @@ System I will no longer be developed by me, and is here really as a personal mus
 
 ## Future
 
-This OS is the philosophical successor to XERIS/APEX System II, which is a much less experimental project of similar (but less wild) structure and capabilities. System II is being written from scratch entirely in Ada. A paper on System II can be found [here](https://annexi-strayline.com/papers/AUJ%2042-1-XERIS-APEX_Wai).
+This OS is the philosophical successor to XERIS/APEX System II, which is a much less experimental project of similar (but less wild) structure and capabilities. System II is being written from scratch entirely in Ada. A paper on System II can be found [here](https://annexi-strayline.com/papers/AUJ42-1-XERIS-APEX_Wai.pdf).
 
 System II will be licensed under a BSD 3-clause license, and is managed under ANNEXI-STRAYLINE. The github repo for this is (not yet made public, but will be soon, a which point this will be a link).
 
