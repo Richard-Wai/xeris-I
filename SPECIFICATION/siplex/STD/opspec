@@ -1,0 +1,146 @@
+%%!xeris%siplex%%*opspec%%%
+
+%%:SIPLEX% Strategic Imperative Planning Liaison Executive%%%
+
+%%`0%%:Role of SIPLEX% in the XERIS/APEX System%%%
+
+SIPLEX provides a core, but intentionally simply-defined role in the
+XERIS/APEX system.
+
+The core role of SIPLEX is to maintain the insertion, removal, and
+general house-keeping of the system's active Dispatches. SIPLEX%
+provides high-level support to OPSEC% by managing long-term queued and
+cyclic tasks, and also manages the executive areas, including the
+provisions of zones, case files, supervisor files, and dispatch files.
+
+SIPLEX% takes an active role in directing OPSEC%, and offers
+relatively few external services. For this reason the specified
+behavior of SIPLEX includes only a very minimal interface, and
+equally minimal set of core services, via two specified Operators.
+
+Such a design allows for the internal operation of SIPLEX, as well as
+additional command and control interfaces to be implemented separately,
+facilitating vastly different levels of system complexity.
+
+One particular expected use-case of SIPLEX% would include general
+language run-times, and particularly multi-threaded
+run-times. Following the over-all XERIS philosophy, in such a case, a
+single "process" or program would occupy an entire node, with the
+run-time tasking (multi-threading) handled by the SIPLEX
+implementation for that application.
+
+%%`1%%:SIPLEX% Standard Interface%%%
+
+The SIPLEX% standard interface consists of two specified operators:
+
+Operator ID      Name        Description
+0000$            SUB$        Shot submission operator
+ffff$            SYS$        SIPLEX Configuration interface
+
+Any other submissions will result in and XERIS Standard Report with
+one of three possible errors:
+ 
+OP-F-NO_OPERATOR    - Operator does not exist
+OP-F-UNACPT_ORDER   - Work order is not a XERIS Standard Service Request
+OP-F_SVC_UNAVAIL    - Service request number is invalid
+OP-F_ACCESS_DENIED  - Privilege not sufficient
+
+Of those request tickets, only three Service Codes are specified:
+
+SVC     Name       Description
+0000    LEAS       Leased shot submission
+0001    PRIV       Private shot submission
+0002    CANC       Cancel shot submission
+
+%%`1/0%% SUB$LEAS# - Leased Shot Submission%%%
+
+Leased shot submissions are intended for triggers, events, or cyclics
+where the result is of no interest. After a leased shot has fired, it
+is returned immediately to the free pool and made available for
+others. SIPLEX% never provides direct references to the public shot
+pool. Therefore successful lease submissions do not provide any internal
+means for result collection. However, the system can be configured to
+generate telemetry for all shot returns.
+
+To request a leased shot submission, first attach a local XERIS
+Dispatch Case File to the Case File Board, and ensure the Board Size
+is set correctly. Next, attach a XERIS Standard Service Request Ticket
+to the Case File with the parameter fields filled-out as follows:
+
+.p16:
+
+0:   Contractor (recipient) SID
+1:   Shot intent code (XERIS Standard Shot Intent)
+2:   Dispatch permit
+3:   N/A
+
+SIPLEX% will make a copy of the submission Case File and assign it to
+a new shot, if a public shot is available.  In the case of a
+successful submission, SUB# will return a XERIS Standard Report Ticket
+with the following configuration:
+
+stub:       ACP
+code:       OP-S-ACCEPTED
+condition:  OKY
+note:       NON
+
+For unsuccessful attempts, the following errors are possible:
+
+Stub   SOSES                  Meaning
+RJT    OP-F-PARAM_EXCUR       Shot intent is invalid
+RJT    OP-F-NOT_PERMITTED     Requested intent was not approved
+RJT    OP-F-CB_CONFIG         Case File Board has invalid configuration
+UNA    OP-F-INSUF_RESRC       No available public shots at this moment
+
+%%`1/0%% SUB$PRIV# - Private Shot Submission%%%
+
+Private shots are intended for cases where a desire for non-blocking
+work be done in background or deferred, but where the result is of
+interest. In cases such as this, a properly authorized Secretariat may
+submit "private" shots by providing a reference to a privately stored
+Shotcard. SIPLEX% checks, and will only accept, Shotcards that are
+within the Secretariat's Operational Partitions. Shotcards may not be
+submitted from the stack.
+
+SIPLEX% does not ensure or check for mutual exclusion of private
+Shotcards. It is the responsibility of the owning Secretariat to
+ensure private Shotcards are not submitted simultaneously.
+
+It is generally recommended that SIPLEX$ be registered with a very
+high (or maximum) Upstream Security Level. It is not generally
+envisioned that SIPLEX% be directly accessed on a general
+basis. Dispatch submissions, public or private, are recommended to be
+submitted exclusively via the appropriate Facility Group Secretariats,
+namely f/cyc%, f/cmd%, and f/batch%.
+
+To request a private shot submission, first attach the subject Shotcard
+to the Case File Board, and ensure the Board Size is set correctly.
+Next, attach a XERIS Standard Service Request Ticket. This ticket has no
+particular parameter fields.
+
+SIPLEX% will attempt to load the Shotcard into a free "sabot" from a
+public queue. In the case of a successful load, SUB# will return a
+XERIS Standard Report Ticket with the following configuration:
+
+stub:       ACP
+code:       OP-S-ACCEPTED
+condition:  OKY
+note:       REF
+adi32:      Submission reference (used to cancel)
+
+The Shotcard status may be read at any time, but the Shotcard shall
+never be written to (including the status) until the Shotcard is
+unloaded (status becomes "UNL"). Once a private Shotcard in unloaded,
+it is ejected from the system entirely, and becomes fully accessible
+to the owner.
+
+SIPLEX% unloads a private shot whenever it completes, or is canceled.
+
+For unsuccessful attempts, the following errors are possible:
+
+stub: RJT
+
+Code Meaning OP-F-PARAM_EXCUR Shot intent is invalid
+OP-F-NOT_PERMITTED Access level is insufficient to use this service
+OP-F-CB_CONFIG Case File Board has invalid configuration
+OP-F-INSUF_RESRC No available "sabots" at this moment

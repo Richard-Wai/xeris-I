@@ -1,0 +1,19 @@
+%%!i/scr/4005%tc%%: Standard Class Registrar - Time/Chronography%%%
+
+%%`0%%:Introduction%%%
+
+The Time/Chronography Standard Class Registrar (i/scr/tc%) registers
+complaint Chronography infrastructure providers. The Chronography
+Infrastructure Provider Class Specification is provided within this
+specification.
+
+%%`1%%:Chronograph Infrastructure Provider Class Specification%%%
+
+Complaint Chronographs are required to provide the following two
+specified desks, but not exclusively:
+
+Desk    Human Name        Description
+0000    query$            Retrieve immediate span vector
+0001    init$             Initialize/reset span vector
+
+  

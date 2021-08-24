@@ -1,0 +1,42 @@
+%%!f/man%telcom$%%%
+
+%%:MAN% Telemetry Commissioner%%%
+
+%%`1%%:Synopsis%%%
+
+MAN%TELCOM$ is a fully complaint Telemetry Commissioner, and can be
+assigned directly in OPCON. MAN%TC$ attempts to translate received
+Telemetry into the specified "Human format", and directly outputs the
+decoded telemetry to the configured console.
+
+%%`1%%:Submission Procedure%%%
+
+MAN%TELCCOM$ only accepts XERIS Standard Telemetry and Service Request
+tickets. Service Request tickets are screened against a configured
+minimum security level. If the incoming downstream security level as
+stamped on the Case File is insufficient, TC$ treats the submission as
+a regular "invalid" ticket.
+
+Tickets that are not Telemetry tickets, or are otherwise invalid, are
+ignored.
+
+Telemetry tickets are processed and exported to the console driver.
+
+TELCOM$ never makes any modifications to the Active Case File, as per
+the Telemetry Commissioner specification. This applies even during
+configuration operations.
+
+%%`2%%:Configuration Procedure%%%
+
+Service Request Tickets received that are meet or exceed the
+downstream security level requirement affect the configuration
+parameter as listed below. The Service Request parameter fields shall
+be filled according to the configuration parameter size as indicated
+in the following table:
+
+RQC    Name  Size    Description
+0000   CON   uint16  Console driver SID
+             uint16  Console driver desk
+0001   SEC   uint16  Security Access Level
+
+             

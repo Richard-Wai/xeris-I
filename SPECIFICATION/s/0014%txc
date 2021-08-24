@@ -1,0 +1,57 @@
+%%!s/0014%txc%%:Ticket Exchange Secretariat%%%
+
+%%`0%%:Synopsis%%%
+
+The Ticket Exchange Secretariat exchanges a ticket pointed to by the
+Case Board Pointer with the ticket associated with the Active Case
+File. The exchange may be executed in one of three modes: Swap
+(swap$), Copy (copy$), or Put (put$). 
+
+%%`1%%:Operational Procedure%%%
+
+The Ticket Swap Secretariat expects a valid XERIS
+Standard/Non-standard Ticket pointer to be passed in the active Case
+File Board Pointer, with the Board Size set appropriately.
+
+The desk must be set according to the intended exchange mode. An
+invalid desk will cause the operation to fail.
+
+Desk ID    HRT Name     Operation
+0000       swap$        Swap
+0001       copy$        Copy
+0002       put$         Put
+
+%%`1/0%%:Swap operation%%%
+
+Swap operations are commanded by submitting to the swap$ desk.
+
+A swap operation is implemented as a sequential Copy operation, to a
+temporary ticket, followed by a Put operation, from the Case Board
+Pointer referenced ticket to the Case Board Work Order, followed
+finally by a Put operation from the temporary ticket to the Case Board
+Pointer referenced ticket. This order is compulsory for adherence to
+this specification.
+
+The Case File Word Order Stub is not set.
+
+%%`1/1%%:Copy operation%%%
+
+Copy operations are commanded by submitting to the copy$ desk.
+
+A Copy operation copies the Case File Work Order ticket to the Case
+Board Pointer referenced ticket.
+
+%%`1/2%%:Put operation%%%
+
+Put operations are commanded by submitting to the put$ desk.
+
+A Put operation copies the Case Board Pointer referenced ticket to the
+Case File Work Order ticket.
+
+The Case File Word Order Stub is not set.
+
+%%`2%%:Possible Failure Modes%%%
+
+If the operation is not successful, impossible, not authorized, or
+incorrect for any reason, s/swp% will clear the Active Case Board,
+posting a NULL pointer, and setting the size to NIL. 

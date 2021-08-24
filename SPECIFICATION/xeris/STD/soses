@@ -1,0 +1,661 @@
+%%?xeris%%*soses%%% 
+%%:Standard Operational Status and Errors Specification%%.0%%,1%%%
+
+%%`0%%:Introduction%%%
+
+The Standard Operational Status and Errors Specification provides a
+standardized specification for Telemetry Reports for all core
+components of the XERIS/APEX system, and is also available and
+encouraged for use across all implementations where possible.
+
+This specification lists the Specifications and associated Codes for
+all Standard Operational Status and Errors, and Telemetry Encoding.
+
+Note the Specification Indexes from 0000 - 00FF are reserved for the
+XERIS/APEX System Specification.
+
+Specification Indexes from 0100 - 0FFF shall be considered generally
+allocated to mass distributed or otherwise common, non-core
+components.
+
+Specification Indexes from 1000 - FFFF shall be used only for
+internal, implementation-specific applications. It shall be expected
+that externally distributed components will not use indexes within
+this range.
+
+%%`/1%%:Human Translation Schema Specification%%%
+
+Each specified SOSES Spec/Code pair may be assigned a specific Human
+Translation Schema. The Human Translation Schema specifies the
+intended human output of a spec/code pair, and allows for further
+specification of the payload/datagram format.
+
+Any Human Translation Schema final output format cannot exceed 80
+UTF-8 encoded octets.
+
+%%`/1/1%%:Schema Format Specification%%%
+
+Schemas are represented inline by the Human Translation string
+associated with a SOSES Spec/Code pair. The number of schemas per
+entry is theoretically unlimited, but the result cannot exceed 80
+UTF-8 encoded octets.
+
+Invalid schemas will invalidate the entire translation. Partial
+translations shall not be undertaken. If a translation is not
+possible, the XERIS Standard Report Encoding Schema should be
+implemented (xeris?xsres*).
+
+All inline format schemas shall be delineated by '`' characters (0x60)
+at the beginning and end of the schema definition.
+
+Schema encoding is case-sensitive.
+
+The schema format is defined as follows:
+
+`(a)(b)(c)(d)`
+
+%%`1/1/1: (a) - Output Format and Radix%%%
+
+This field shall be only one UTF-8 octet wide, and must be one of the
+following 5 possible values. Any other value invalidates the schema.
+
+UTF-8     Format   Radix
+s         Signed   Decimal
+u         Unsigned Decimal
+x         Unsigned Hexadecimal
+o         Unsigned Octal
+b         Unsigned Binary         
+
+%%`1/1/2: (b) - Word size%%%
+
+This field shall be only one octet wide, and must be one of the
+following 3 possible values. Any other value invalidates the schema.
+
+This value represents the data word with that is to be sourced for
+conversion.
+
+UTF-8     Word size
+1         8 bit
+2         16 bit
+4         32 bit
+
+%%`1/1/3: (c) - Datagram word offset%%%
+
+This field shall be only one octet wide, and must be one of the
+following 3 possible values. Any other value invalidates the schema.
+
+This value indicates the word index (offset) in the 32-bit datagram
+region of the report/telemetry ticket.
+
+UTF-8     Index
+0         0
+1         1
+2         2
+3         3
+
+%%`1/1/4: (d) - Output conversion clamp/extend length%%%
+
+This field shall be one to three octets wide, and must only
+contain UTF-8 encoded digits (0-9) that represent an unsigned decimal
+value. This field may be empty. If more than three octets are
+supplied, or if any of the octets are not valid digits, the schema is
+invalidated.
+
+This value indicates a fixed, constant number of digits (characters)
+available for output of the encoded datagram value. If the source
+value is larger than can fit into the specified length, it is clamped
+to the specified length (truncated towards the most significant
+digits).
+
+%%`/1/2%%:Schema Examples%%%
+
+SOSES Human Translation Entry:
+"32-bit datagram hex dump: `h408`"
+
+Result:
+"32-bit datagram hex dump: 01234567"
+
+SOSES Human Translation Entry:
+"32-bit datagram hex dump: `h204` `h214`"
+
+Result:
+"32-bit datagram hex dump: 0123 4567"
+
+%%`/2%%:Specification Index%%%
+
+Spec  Title
+0000  Universal Simple Status Reporting
+0001  XERIS/APEX Core Error and Intervention
+0010  OPSEC% Specific Status Reporting
+0011  FLATLINE% Specific Telemetry Reporting
+0012  ATRIA% Specific Telemetry Encoding
+0013  SIPLEX% Specific Telemetry Encoding
+
+%%`%%:Spec 0000 - Universal Operational Status Reporting%%%
+
+The Universal Operational Status Reporting Code Specification provides
+typical-case, implementation-agnostic status and error codes for most
+"typical" operational conditions, specifically for initialization,
+termination, and processing. The primary goal of the Universal
+Operational Status Reporting specification is to provide the relevant
+Telemetry codes for the core XERIS/APEX system (see the MVAS
+Specification - xeris?mvas*)
+
+The codes are arranged in logical grouping relative to the most
+significant nibble of the Telemetry Code, as follows:
+
+Range         GRP   Description
+0000 - 0FFF    S    Information / Status
+1000 - 1FFF    I    Initialization messages
+2000 - 2FFF    W    Warning messages
+3000 - 3FFF    E    Non-fatal Error Messages
+4000 - 4FFF    C    Critical Error - Intervention Required
+5000 - 5FFF    F    Fatal Error Messages
+6000 - 6FFF    T    Unexpected Termination Messages
+
+
+E000 - EFFF   DB1   Debug 1
+F000 - FFFF   DB2   Debug 2
+
+%%`/0%%:Group 0000 - 0FFF: Information / Status%%%
+
+Code   Human Code                Human Message
+0000   OP-S-INCP_NOTICE          "Inception Notice"
+0001   OP-S-OPR_OK               "Operation Successful"
+0002   OP-S-REQUEST_CPL          "Request Complete"
+0003   OP-S-READ_ONLY            "Read-Only"
+0004   OP-S-WRITE_ONLY           "Write-Only"
+0005   OP-S-REQUEST_UKN          "Unknown Request"
+0006   OP-S-NOMINAL_ENTRY        "Reporting Nominal Entry"
+0007   OP-S-AUTH_OK              "Authorization Successful"
+0008   OP-S-TEST_PASS            "Test Passed"
+0009   OP-S-ACCEPTED             "Submission accepted"
+000a   OP-S-APPROVED             "Application approved"
+
+%%`/1%%:Group 1000 - 1FFF: Initialization Messages%%%
+
+Code   Human Code                Human Message
+1000   OP-I-INIT_NORMAL          "Init Normal"
+1001   OP-I-INIT_LEVEL           "Init Level"
+1002   OP-I-INIT_ABNORMAL        "Init Abnormal"
+1003   OP-I-INIT_FAILSAFE        "Init Fail-safe Level"
+1004   OP-I-INIT_EMERGENCY       "Init Emergency"
+1005   OP-I-INIT_RECOVERY        "Init Recovery"
+1006   OP-I-INIT_DEFERED         "Init Deferred"
+1007   OP-I-INIT_EMERG_OK        "Emergency Init OK"
+1008   OP-I-INIT_ABNRML_OK       "Abnormal Init OK"
+1009   OP-I-INIT_OK              "Init OK"
+100A   OP-I-INIT_PARAM           "Init Parameters"             
+100B   OP-I-INIT_AUTO            "Autonomous Init"
+100C   OP-I-INIT_INTV            "Init Intervention"
+100D   OP-I-INIT_LATE            "Late Initialization"
+100E   OP-I-INIT_CONFIG          "Init configuration"
+100F   OP-I-INIT_FAIL            "Init failed"
+1010   OP-I-INIT_REQUIRED        "Init required"
+1011   OP-I-INIT_ILLEGAL         "Init not allowed"
+
+%%`//0000%%:Init (Normal)%%
+
+Normal Initialization started
+
+%%`//0001%%:Init Level%%
+
+Initialization at level provided in additional payload
+
+%%`//0002%%
+
+%%`/3%%:Group 3000 - 3FFF: Non-Fatal Error Messages%%%
+
+Code   Human Code                Human Message
+3000   --                        --
+3001   OP-E-OPR_LIMIT            "Operation Limited"
+
+%%`/5%%:Group 5000 - 5FFF: Fatal Error Messages%%%
+
+Code   Human Code                Human Message
+5000   OP-F-INIT_FATAL           "Initialization fatal"
+5001   OP-F-RECOVER_FAIL         "Recovery failed"
+5002   OP-F-SVC_UNAVAIL          "Requested service is unavailable"
+5003   OP-F-NOT_PERMITTED        "Not permitted"
+5004   OP-F-ACCESS_DENIED        "Access denied"
+5005   OP-F-WRITE_UNABLE         "Unable to Write"
+5006   OP-F-READ_UNABLE          "Read Unable"
+5007   OP-F-INTRFC_UNRSPNSV      "Interface Unresponsive"
+5008   OP-F-UNACPT_ORDER         "Unacceptable Work Order"
+5009   OP-F-NO_OPERATOR          "No such operator"
+500a   OP-F-OPR_UNAVAIL          "Operator unavailable"
+500b   OP-F-NO_AUTH              "Not Authorized"
+500c   OP-F-TEST_FAIL            "Test Failed"
+500d   OP-F-PARAM_EXCUR          "Parameter Bounds Excursion"
+500e   OP-F-DATA_CORRUPT         "Data Corruption Detected"
+500f   OP-F-EC_UNABLE            "Error Correction Failed"
+5010   OP-F-VERIFY_FAIL          "Verification Failed"
+5011   OP-F-OPTION_UNKN          "Option Not Recognized"
+5012   OP-F-CB_CONFIG            "Unacceptable case board configuration"
+5013   OP-F-INSUF_RESRC          "Insufficient Resources"
+5014   OP-F-NO_SECRETARIAT       "Secretariat not found"
+5015   OP-F-OVERFLOW             "Overflow error"
+5016   OP-F-SIGNAL_ERROR         "Signal state nonsensical"
+5017   OP-F-PROC_VIOL            "Procedure Violation"
+5018   OP-F-UNDEFINED            "Error not programmed"
+5019   OP-F-NO_RECORD            "No record registered"
+
+%%`/5%%:Group 7000 - 7FFF: Normal Exit Messages%%%
+
+Code   Human Code                Human Message
+7000   OP-OK-COMPLETE            "Complete as Filed"
+7001   OP-OK-CTRL_TRANSFR        "Control transferred"
+7002   OP-OK-READY               "Ready"
+
+
+
+%%`%%:Spec 0001 - XERIS/APEX Core Error and Intervention%%%
+
+The Universal Operational Status Reporting Code Specification provides
+typical-case, implementation-agnostic status and error codes for most
+"typical" operational conditions, specifically for initialization,
+termination, and processing. The primary goal of the Universal
+Operational Status Reporting specification is to provide the relevant
+Telemetry codes for the core XERIS/APEX system (see the MVAS
+Specification - xeris?mvas*)
+
+The codes are arranged in logical grouping relative to the most
+significant nibble of the Telemetry Code, as follows:
+
+Range         GRP   Description
+0000 - 0FFF    S    Information / Status
+1000 - 1FFF    I    Initialization messages
+2000 - 2FFF    W    Warning messages
+3000 - 3FFF    E    Non-fatal Error Messages
+4000 - 4FFF    C    Critical Error - Intervention Required
+5000 - 5FFF    F    Fatal Error Messages
+6000 - 6FFF    T    Unexpected Termination Messages
+7000 - 7FFF    P    Illegal Action
+
+
+E000 - EFFF   DB1   Debug 1
+F000 - FFFF   DB2   Debug 2
+
+%%`/0%%:Group 0000 - 0FFF: Information / Status%%%
+
+Code   Human Code                Human Message
+
+%%`/0%%:Group 1000 - 1FFF: Initialization Messages%%%
+
+Code   Human Code                Human Message
+1000   SYS-I-INIT-STRAP          Initialization Bootstrap
+1001   SYS-I-INIT_CONFIG         Initialization Configuration
+
+%%`/0%%:Group 2000 - 2FFF: Warning Messages%%%
+
+Code   Human Code                Human Message
+2000   SYS-W-ZONE_THRESHOLD      "Stack at zone warning threshold"
+2001   SYS-W-CONFIG_SIZE         "Config block size incorrect"
+2002   SYS-W-NO_CONFIG           "Config block not available"
+
+%%`/0%%:Group 3000 - 3FFF: Denial Messages%%%
+
+Code   Human Code                Human Message
+3000   SYS-D-NO_TELCOM           "No telemetry commissioner registered"
+
+%%`/0%%:Group 4000 - 4FFF: Critical Error%%%
+
+Code   Human Code                Human Message
+4000   SYS-C-LOCAL_EXCURSION     "Stack has breached work area"
+
+%%`/0%%:Group 5000 - 5FFF: Fatal Error%%%
+
+Code   Human Code                Human Message
+5000   SYS-F-ZONE_EXCURSION      "Stack has breached zone"
+5001   SYS-F-EMRG_LOCKDOWN       "Dispatch is in emergency lockdown"
+
+%%`/5%%:Group 7000 - 7FFF: Illegal Action%%%
+
+Code   Human Code                Human Message
+7000   SYS-P-CERT_INVALID        "Certificate Invalid"
+7001   SYS_P-TX_NO_ACCNT         "No transaction account defined"
+7002   SYS-P-TX_EVENT_CON        "Transaction event containment"
+7003   SYS-P-SYS_STUB            "SYS Stub use is illegal"
+7004   SYS-P-TICKET              "Ticket as submitted is illegal"
+
+
+%%`10%%:Spec 0010 - OPSEC% Specific Status Reporting%%%
+
+The OPSEC% Specific Status Reporting specification provides detailed
+status reporting focused on OPSEC% internal operations. This
+Specificatio is primarily used by OPSEC%'s internal operators and is
+not normally encountered by mission applications.
+
+The codes are arranged in logical grouping relative to the most
+singificant nibble of the Telemetry Code, as follows:
+
+Range         GRP   Description
+0000 - 0FFF    S    Information / Status
+1000 - 1FFF    I    Initialization messages
+2000 - 2FFF    W    Warning messages
+3000 - 3FFF    E    Non-fatal Error Messages
+4000 - 4FFF    C    Critical Error - Intervention Required
+5000 - 5FFF    F    Fatal Error Messages
+6000 - 6FFF    T    Unexpected Termination Messages
+8000 - 8FFF    A    Procuratorate Liaison Audit
+
+E000 - EFFF   DB1   Debug 1
+F000 - FFFF   DB2   Debug 2
+
+%%`/0%%:Group 0000 - 0FFF: Infromation / Status%%%
+
+Code   Human Code                Translation
+0000   OPSEC%S-INCP_NOTICE       "Inception Notice"
+
+
+%%`11%%:Spec 0011 - FLATLINE% Specific Telemetry Encoding%%%
+
+The OPSEC% Specific Status Reporting specification provides detailed
+status reporting focused on OPSEC% internal operations. This
+Specification is primarily used by OPSEC%'s internal operators and is
+not normally encountered by mission applications.
+
+The codes are arranged in logical grouping relative to the most
+significant nibble of the Telemetry Code, as follows:
+
+Range         Group
+0000 - 1FFF   OMNI$
+A000 - FFFF   XERIS/APEX Version
+
+
+%%`/0%%:0000 - 2FFF: SYSBOOT$ ULIF$ OMNI$ Telemetry%%%
+
+Code   Datagram   Description                      Section
+0000   no         FLATLINE Inception               0
+0001   yes        ULIF$ Status                     1
+0002   no         OMNI$ NOMINAL                    2
+0003   yes        OMNI$ ALTERNATE                  3
+0004   yes        OMNI$ Checkpoint                 4
+0010   no         Real mem                         5
+0011   yes        (order 1)                        5
+-001F  yes        (order 16)                       5
+0020   no         Exec mem                         6
+0021   yes        (order 1)                        6
+-002F  yes        (order 16)                       6
+
+%%`//0%%:0000& FLATLINE Inception%%%
+
+The FLATLINE Inception telemetry code indicates a FLATLINE event has
+occurred, and the node is booting. FLATLINE% send two of these
+telemetry signals immediately after ETHER%ELO$ is initialized.
+
+SOSES: "\r\nFLATLINE"
+
+%%`//1%%:0001& ULIF$ Initialization%%%
+
+This code returns the result of the FLATLINE%ULIF$ driver
+activation. This telemetry indicates the number of RX and TX lines
+available. 
+
+Datagram:
+uint8 TX lines
+uint8 RX lines
+
+SOSES:
+"\r\n%ULIF $TX/`u20` $RX/`u21`"
+
+%%`//2%%:0002& - OMNI$ NOMINAL%%%
+
+This telemetry datagram indicates nominal entry.
+
+SOSES: "\r\n%OMNI $NOMINAL "
+
+%%`//3%%:0003& - OMNI$ ALTERNATE%%%
+
+This telemetry datagram indicates that OMNI has commanded an alternate
+initialization strategy for startup.
+
+Datagram
+uint32 Alternate Proceedure Number
+
+SOSES: "\r\n%OMNI $ALTERNATE/`u40` "
+"%32/10"
+
+%%`//4%%:0004& - OMNI$ Checkpoint%%%
+
+This telemetry datagram indicates that OMNI$ as completed/reached a
+specific checkpoint in the module. Checkpoints are unique sub-modules
+within OMNI$. Checkpoints in NOMINAL vs ALTERNATE modes should refer
+to the same sub-modules.
+
+Datagram
+uint32  Checkpoint ID
+
+SOSES: "`u40` "
+
+%%`//3%%:0010 - 001F Real Memory count%%%
+
+This telemetry datagram returns the total working memory available to
+the node (OPSEC%). The base (multiplayer) can be indicated with the
+appripriate higher-order code (0010 = Bytes, 0011 = GB, 0012 = XB,
+0013 = YB, etc).
+
+Datagram:
+uint32 segment multiple
+
+SOSES: "\r\nreal mem = `u40`"    (0010)
+       "\r\nreal mem = `u40` GB" (0011)
+
+%%`//4%%:0020 - 002F& Executive Memory%%%
+
+This datagram represents the available executive working memory as
+reported by ATRIA%CTXM$. The base (multiplier) can be indicated with
+the appripriate higher-order code (0020 = Bytes, 0021 = GB, 0022 = XB,
+0023 = YB, etc).
+
+Datagram:
+uint32 base multiple
+
+SOSES: "\r\nexec mem = `u40`"    (0020)
+       "\r\nexec mem = `u40` GB" (0021)
+
+
+%%`/1%%:A000 - FFFF: XERIS/APEX Version Information%%%
+
+The XERIS/APEX version information telemetry provides crucial
+compatibility reference information to the Tier Horizon. These
+telemetry come in the form of a format "package", where the most
+significant three digits (hex) represent the format, starting at
+A000-A00f. The least significant digit represents each element of the
+package.
+
+The A00x package is defined as follows:
+SOSES
+xxx0: Release
+xxx1: Major Version
+xxx2: Minor Version
+xxx3: Copyright
+xxx4: Legal 1
+xxx9: Legal 6
+xxxa: Note 1 ...
+xxxf: Note 6
+
+Datagrams:
+
+xxx0:
+uint32 Release number
+
+xxx1:
+uint32 Major Version
+
+xxx2:
+uint32 Minor Version
+
+xxx2-f:
+Subject to release
+
+
+Release 1 SOSES Translations:
+
+A000: "\r\n\n\nXERIS/APEX System I Release `u40`"
+
+A001: " V`u40`"
+A002: ".`u40`"
+
+
+%%`13%%:Spec 0013 - SIPLEX% Specific Telemetry Encoding%%%
+
+SIPLEX% telemetry encoding is targeted primarily at initialization and
+system intervention messages.
+
+The codes are arranged in the following logical groupings:
+
+Range        Group
+0000 - 3000  Configuration Telemetry
+
+%%`/0%%:0000 - 3000 Configuration Telemetry
+
+Configuration telemetry emanates from SIPLEX%INIT$ as invoked from
+FLATLINE%OMNI$. It provides general SIPLEX configuration infromation
+to the Tier Horizon.
+
+Code   Datagram   Description                      Section
+0000   yes        SIPLEX% Package                  0
+-afff
+b000   yes        SIPLEX% Architecture             1
+b001   yes        SIPLEX% Device                   2
+b002   yes        SIPLEX% Major Version            3
+b003   yes        SIPLEX% Minor Version            4
+
+b010   yes        Lane count                       5
+b011   yes        Queue count                      6
+b020   yes        Zone target size                 7
+-b02f
+b030   yes        Interrupt zone size              8
+-b03f
+
+
+%%`//0%%:SIPLEX% Package%%%
+
+Siplex Package indicates which universal build description the version
+of SIPLEX conforms to.
+
+Datagram:
+uint32  Package Qualifier
+
+0000: "\r\n!SIPLEX/STARLINE "
+
+
+%%`//1%%:SIPLEX% Architecture%%%
+
+Siplex Architecture indicates the system architecture for which the
+package as built for. Consult the XERIS Consolidated System
+Architecture Index (xeris?csai) for details.
+
+Datagram:
+uint32 Family (Index)
+
+SOSES: "(`x40`/"
+
+The hexidecimal index may optionally be replaced by the human name
+given to the architecture in the xeris?csai specification.
+
+
+%%`//2%%:SIPLEX% Device%%%
+
+Siplex Architecture indicates the system architecture for which the
+package as built for. Consult the XERIS Consolidated System
+Architecture Index (xeris?csai) for details.
+
+Datagram:
+uint32 Device (Index)
+
+SOSES: "`x40`) "
+
+The hexidecimal index may optionally be replaced by the human name
+given to the architecture in the xeris?csai specification.
+
+
+%%`//3%%:SIPLEX% Major Version%%%
+
+Siplex Version indicates the major and minor version numbers of the
+installed package.
+
+Datagram:
+uint32  Major Version
+
+SOSES: "Version `u40`."
+
+
+%%`//4%%:SIPLEX% Minor Version%%%
+
+Siplex Version indicates the major and minor version numbers of the
+installed package.
+
+Datagram:
+uint32  Minor Version
+
+SOSES: "`u40`\r\n%init "
+
+
+%%`//5%%:Lane count%%%
+
+This indicates the number of lanes available on the node. For counts
+that are larger than uint32, consecutive report/telemetry tickets are
+sent, the sum of which is the total number of lanes on the node.
+
+
+Datagram
+uint32 Lane count
+
+SOSES: "$lanes/`u40` "
+
+
+%%`//6%%:Queue count%%%
+
+This indicates the number of queues available on the node. For counts
+that are larger than uint32, consecutive report/telemetry tickets are
+sent, the sum of which is the total number of queues on the node.
+
+
+Datagram
+uint32 Queue count
+
+SOSES: "$queues/`u40` "
+
+
+%%`//7%%:Zone target size%%%
+
+This indicates the size of the Interrupt reserved zone.
+
+Datagram
+uint32 Zone target size
+
+SOSES: b020 "$zones/`u40` "
+       b021 "$zones/`u40`GB "
+
+       
+%%`//8%%:Interrupt zone size%%%
+
+This indicates the number of queues available on the node. For counts
+that are larger than uint32, consecutive report/telemetry tickets are
+sent, the sum of which is the total number of queues on the node.
+
+
+Datagram
+uint32 Interrupt Zone size
+
+SOSES: b030 "$intz/`u40` "
+       b031 "$intz/`u40`GB "
+
+
+
+
+
+       
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,44 @@
+%%!0004%init%%:Node Initialization Bootstrap%%%
+
+%%`0%%:Synopsis%%%
+
+The Node Initialization Bootstrap (init%) is always the first shot
+loaded by SIPLEX% after it has initialized all lanes. The genertic
+form for init% follows a "strap" that is defined in the local ATRIA
+Secretariat Registrar. The node init strap is rebuilt during
+registration of complient secretariats.
+
+%%`1%%:Mode of operation%%%
+
+
+%%`1/1%%:Simple Initialization%%%
+
+For each Secretariat on the strap, there is a two-phase process. The
+first phase is initiated with an "INI" stub Work Order sent to desk
+0000$ of the target Secretariat. The Case Board is guaranteed to be
+clear.
+
+If no config block is requred, the secretariat shall return a Word
+Order with the following configuration:
+
+Stub:    CPL
+Ticket:  XERIS Standard Report Ticket
+Spec:    OP
+Code:    OP-I-INIT_OK
+
+If any other stub or ticket configuration is received, the
+initialization will be assumed to have failed. 
+
+If the receiving secretariat wishes to load a configuration block,
+they must return from the first phase with the Case Board set properly
+to receive the configuration file, and then configure the Work Order
+with exactly the following configuration:
+
+
+Stub:    PAR
+Ticket:  XERIS Standard Report Ticket
+spec:    OP
+code:    OP-I-INIT_CONFIG
+cond:    RTY
+note:    NON
+

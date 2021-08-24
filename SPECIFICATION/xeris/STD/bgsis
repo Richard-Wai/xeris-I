@@ -1,0 +1,193 @@
+%%?xeris%%*BGSIS%%:Base Guaranteed Secretariat Index Specification%%%
+
+%%`1%%:INTRODUCTION%%%
+
+The XERIS/APEX system is specified to be as flexible in implementation
+as possible. However, to maintain the best of a universal
+specification, and the greatest flexibility, there needs to be some
+baseline agreements for the very foundation of the system.
+
+At a fundamental level, XERIS/APEX identifies Secretariats not though
+some kind of abstracted file-system, but rather a simple Identification
+Index. This is for both efficiency, and security. Through this system,
+only the Executive Group members are ever directly exposed to the real
+location of any Secretariat within the system. A human-oriented
+registry resembling a "file system" is optionally available as one of
+the Base Guaranteed Secretariat Index (man%hrt$). Otherwise, this
+system is more resource efficient, and can be automated.
+
+In order to generate a reliable specified system, there are a few
+basic services and facilities that are assigned a guaranteed specified
+index number. Guaranteed means that the Secretariat Index ID that
+OPSEC% uses to route Dispatch Orders is guaranteed to be the same
+across all XERIS/APEX nodes and implementations, and across all
+Releases and Versions of the XERIS/APEX Specification.
+
+It is not, however, guaranteed that all secretariats listed in this
+specification will be necessarily present on any given node or tier.
+
+
+%%`/%%:Operational Groups%%%
+
+Operational Groups are logical divisions of the Guaranteed
+Secretariats by general areas of responsibility. The Operational Group
+is demarcated by the most significant four bits of the least
+significant byte of the Secretariat Identification (SID). It should
+be however noted that this logical partitioning is only a specified
+feature for organization, and especially for human
+intuitiveness. There is no true operational significance to the
+stratification. The only technical significance is that operators
+:0000% - :00ff% are reserved and of a guaranteed, static assignment
+across all XERIS/APEX nodes, regardless of implementation.
+
+Secretariats who's IDs fall within these values shall always be
+referred to in this specification.
+
+The Operational Groups (Op Groups) are as follows:
+
+Grp #   Group Designation      SID Reserved Range   HRT Logical Division
+0       Executive              :0000% - :000f%      x/
+1       Support                :0010% - :0fff%      s/
+2       Facilities             :1000% - :1fff%      f/
+3       Logistics              :2000% - :2fff%      l/
+4       Transport              :3000% - :3fff%      t/
+5       Infrastructure         :4000% - :4fff%      i/
+6       Directorate            :5000% - :5fff%      d/
+5       User                   :6000% - :ffff%      u/
+
+
+%%`0%%:Executive Group (:0000% - :000f%)%%%
+
+The executive group contains all of the very core XERIS/APEX executive
+secretariats that provision basic executive capability of a node.
+
+The executive group contains the following static secretariats:
+
+SID       HRT          Human Name             SPEC
+%0000     !opsec%      Operations Secretariat xeris!opsec%
+%0001     !flatline%   FLATLINE               xeris!flatline%
+%0002     !atria%      ATRIA                  xeris!atria%
+%0003     !siplex%     SIPLEX                 xeris!siplex%
+%0004     !strap%      Node bootstrap         xeris!strap%
+%0005     !ether%      ETHER                  xeris!ether%
+%0006     !emerg%      Terminal Emergency     xeris!emerg%
+
+%%`3%%:Support Group (0010% - 0fff%)%%%
+
+The Support Group provides common services for internal use.
+
+The Support Group has registered the following specified:
+
+SID       HRT          Human Name             SPEC
+0010      !s/lo%       Loop-back              xeris!s/0010%lo
+0011      !s/clr%      Clear Case File        xeris!s/0011%clr
+0012      !s/rsv%      Reserve Case File      xeris!s/0012%rsv
+0013      !s/isu%      Issue Case File        xeris!s/0013%isu
+0014      !s/txc%      Ticket Exchange        xeris!s/0014%swp
+
+%%`2%%:Facilities Group (1000% - 1fff%)%%%
+
+The Facilities Group contains various generalized resource and
+operation management secretariats. In contrast to the Support Group,
+focuses more on inter-secretarial delegation and public resource
+management.
+
+The Facilities Group has registered the following possible
+secretariats:
+
+SID       HRT          Human Name
+1000      !f/reg%      Registrar General
+1001      !f/lea%      Workspace Lease Facility
+1002      !f/sync%     Synchronization Facilities
+1004      !f/pac%      Permits and Authorization Commission
+1005      !f/cyc%      Cyclic Dispatch Commission
+1006      !f/cmd%      Command Dispatch Commission
+1007      !f/batch%    Batch Dispatch Commission
+1234%     !f/man%      Human Relations
+                       Secretariat
+
+%%`2%%:Logistics Group (2000% - 2fff%)%%%
+
+The Logistics Group handles high-level inter-nodal communication and
+bulk transfer.
+
+The logistics group operates at the highest level, on top of the
+Interface and Infrastructure group. It is intended that the XERIS/APEX
+may be distributed transparently over any communication or network
+topology. Therefore this group focuses on tier coherence, interface,
+and inter-operation. 
+
+SID       HRT          Human Name              SPEC
+2000%     !l%track     Track Registrar         xeris!l/2000%track
+2001%     !l%cns       Consignment Service     xeris!l/2001%cns
+2002%     !l%ttd       Trans-Tier Dispatch     xeris!l/2002%ttd
+
+2345%     !l%tty       Human Access Manager    xeris!l/2345%tty
+
+
+%%`3%%:Transport Group%%%
+
+The Transport Group handles various transport protocol suites for the
+support of the Logistics Group in facilitating various data transport
+operations and harness interfaces.
+
+Generally, transport group secretariats perform routing, trunking, and
+provisioning of data exchange through configured infrastructure
+service providers. For example, the t/ip% secretariat will handle
+distributing a packet to the appropriate physical interface driver
+according to the address. Transparent meshing can also be performed
+for non-switched protocols, such as i2c or CAN, if so configured.
+
+User-defined transports may be implemented from 1900-1fff%, but it is
+strongly encouraged that they continue to conform to the standard
+framework.
+
+Specified Interface Secretariats herein listed shall always conform
+to the Universal Transport Framework specification (xeirs?utf*). This
+framework outlines a conceptual system-level interface that allows for
+a two phase set-up of point-to-point (node-to-node) "tracks"
+(0000-ffff per transport).
+
+SID       HRT          Human Name                   SPEC
+3000%     !t/uu%       Node-Node Relay              xeris!3000%uu
+3001%     !t/vec%      Linear Vector Addressed      xeris!3001%vec
+3002%     !t/inet%     Internet Protocol            xeris!3002%inet
+3003%     !t/eth%      Ethernet Addressed
+3004%     !t/i2c%      12c Addressed
+3005%     !t/smb%      SMBus Addressed
+3006%     !t/can%      CAN Bus Addressed
+
+
+%%`5%%:Infrastructure Group%%%
+
+The Infrastructure Group focuses on bare-metal management of hardware,
+and provides basic, and to the greatest extent possible standardized,
+interfaces primarily for the use of the transport and facilities
+groups.
+
+Standard class registrars shall register only Class Complaint
+secretariats that conform to the relevant Class Registrar
+Specification.
+
+Indexes from 4000 - 40ff are reserved for Standard Class Registrars.
+
+Indexes from 4100 - 4fff are not standardized, and are freely
+assignable to local infrastructure providers.
+
+Standard Registrars
+
+SID       HRT           Human Name                   SPEC
+4000%     !i/scr/if%    Interface (Transport)        xeris!i/scr/if%
+4001%     !i/scr/dm%    Data Management              xeris!i/scr/dm%
+4002%     !i/scr/cc%    Command/Control              xeris!i/scr/cc%
+4003%     !i/scr/mm%    Machine/Maintenance          xeris!i/scr/mm%
+4004%     !i/scr/cp%    Computation/Processing       xeris!i/scr/cp%
+4005%     !i/scr/tc%    Time/Chronography            xeris!i/scr/tc%
+
+%%`6%%:User Group%%%
+
+This group contains all implementation-specific Secretariats,
+including hardware drivers.
+
+SID       HRT          Human Name                   SPEC
+

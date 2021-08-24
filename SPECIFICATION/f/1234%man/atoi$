@@ -1,0 +1,54 @@
+%%!f/man%%$atoi%%%
+
+%%:String to Integer Conversion Desk%%%
+
+%%`0%%:Description%%%
+
+The MAN% Integer to String Conversion Desk (man%atoi$) accepts a
+32-bit max signed or unsigned integer in human-readable UTF-8 format,
+to be converted into a 32-bit signed or unsigned integer value.
+
+%%`1%%:Submission Procedure%%%
+
+atoi$ accepts only XERIS Standard Service Requests Tickets. Tickets of
+other types will be rejected.
+
+atoi$ expects a suitable buffer to be attached to the Case Board.
+
+atoi$ will only process the characters up to the first null character
+encountered, or the end of the buffer, whichever comes first. atoi$
+ignores spaces ' ', and commas ',', but encountering any other value
+causes atoi$ to end the conversion process. If the service code
+indicates a signed value, and the first character is a '-', it is
+ignored. For any signed value, the sign shall always be the first
+character of the buffer, or the value will be interpreted as being
+positive.
+
+The Service Request Code indicates two conditions. The high byte
+indicates if the input value is signed (1) or unsigned (0). The low
+byte indicates the radix of the input, according to the following
+table:
+
+Value   Code    Radix
+00      HEX     16
+01      DEC     10
+02      OCT     08
+03      BIN     02
+
+For example:
+
+Request Code      Expected Input
+0000              Unsigned Hexadecimal
+0101              Signed Decimal
+
+The target value for conversion shall be passed as prm32[0].
+
+%%`2%%:Possible Returns%%%
+
+atoi$ will always return a XERIS Standard Report Ticket with the
+following possible outcomes:
+
+Stub    SOSES Code          Description
+CPL     OP-S-REQUEST_CPL    Request was completed as filed
+RJT     OP-F-SVC_UNAVAIL    Bad service code
+RJT     OP-F-CB_CONFIG      Case Board configuration unacceptable

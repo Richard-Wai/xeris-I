@@ -1,0 +1,68 @@
+%%!xeris%opsec%%*opspec%%%
+
+%%:OPSEC% Operational Specification%%%
+
+%%`0%%:Role of OPSEC% in the XERIS/APEX System%%%
+
+A core operating philosophy of the XERIS/APEX system is the clear and
+focused division of roles among Secretariats and their Operators. The
+Secretariat should cover a specific area of responsibility, while its
+constituent Operators and Assistants execute specific tasks which
+together allow the responsibility to be covered in all situations.
+
+It is important in the design and specification of the XERIS/APEX
+system that exceptions and special treatment be limited as far as
+possible, and that consistent rules predominate.
+
+Though OPSEC% may seem to have a very special role in the XERIS/APEX
+system, it is really just one of many Secretariats within a local
+node. The only single exception that truly sets OPSEC% apart from
+other Secretariats lies in the special access method afforded to
+OPSEC%. That is: OPSEC% is the only Secretariat who's Dispatch Desk
+may be accessed directly by any other Secretariat within a node. It
+should be emphasized: this is the one and only distinction.
+
+OPSEC% has this special provision due to its specific
+responsibility. OPSEC%, or the Operations Secretariat, as it's name
+suggests, has the responsibility of handling Operations within the
+local node in which it resides.
+
+%%`1%%:Defining the Responsibility of the Operations Secretariat%%%
+
+Each Executive Core within a given Tier of a XERIS/APEX system is
+managed by a singular OPSEC% local to that core. Executive Cores
+generally refer to a finite collection of memory and compute
+resources, such that the collection is restricted to sequential
+instruction execution.
+
+OPSEC%s is assigned to it a "fleet" (the Executive Fleet) of "trucks"
+that are essentially moving contexts, which are assigned a dispatch. All
+trucks are provided to OPSEC% by the local STARLINE% (the Stratified
+Tier Assignments and Reporting Liaison Interface Node Executive).
+STARLINE%. OPSEC%'s responsibility is to properly schedule and marshal
+all assigned trucks and supervise their assigned dispatch roles.
+
+%%`1%%:Operating from within OPSEC%%%
+
+As an operator executing as part of a dispatch, OPSEC% provides a
+single services interface through the Central Dispatch Desk
+(opsec%cdd$). When an operator wishes to submit a dispatch order, it
+does so by submitting directly to the opsec%cdd$. cdd$ then forwards
+the dispatch ticket on the selected outbound track to recipient
+secretariat.
+
+%%`1/1%%:Executive Dispatch Handling%%%
+
+Upon receipt of an inbound dispatch, besides carrying-out local actions
+as required, the operator can only SUBMIT a new dispatch, or RETURN a
+completed dispatch.
+
+The SUBMIT action is the only true "system call" in the XERIS/APEX
+system. SUBMIT takes two arguments: a XERIS Standard Dispatch Order,
+and the requested outbound Track.
+
+
+
+
+
+

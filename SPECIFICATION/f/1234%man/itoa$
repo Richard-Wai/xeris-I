@@ -1,0 +1,60 @@
+%%!f/man%%$itoa%%%
+
+%%:Integer to String Conversion Desk%%%
+
+%%`0%%:Description%%%
+
+The MAN% Integer to String Conversion Desk (man%itoa$) accepts a
+32-bit signed or unsigned integer to be converted into Human-readable
+text of an indicated base (2, 8, 10, 16).
+
+%%`1%%:Submission Procedure%%%
+
+itoa$ accepts only XERIS Standard Service Requests Tickets. Tickets of
+other types will be rejected.
+
+itoa$ expects a suitable buffer to be attached to the Case Board. The
+Case Board size must be at least 34 bytes.
+
+itoa$ will reference the Case Board attached buffer to determine any
+digit restriction. To indicate a digit minimum or restriction, the
+buffer should be written with UTF-8 '0' characters. If itoa$ finds a
+'0' character at the beginning of the buffer, it will only write
+digits to the contiguous string of '0' characters found at the
+beginning of the buffer.
+
+For example, assuming an input of "12456789" (radix 10):
+
+Initial Buffer                Final buffer
+"bkjq2e334lkn34af\0"          "123456789\0kn34af\0"
+"000q2e334lkn32af\0"          "123\02e334lkn32af\0"
+"0000000000000000\0"          "0000000123456789\0"
+
+The Service Request Code indicates two conditions. The high byte
+indicates if the input value is signed (1) or unsigned (0). The low
+byte indicates the radix of the output, according to the following
+table:
+
+Value   Code    Radix
+00      HEX     16
+01      DEC     10
+02      OCT     08
+03      BIN     02
+
+For example:
+
+Request Code      Conversion Result
+0000              Unsigned Hexadecimal
+0101              Signed Decimal
+
+The target value for conversion shall be passed as prm32[0].
+
+%%`2%%:Possible Returns%%%
+
+itoa$ will always return a XERIS Standard Report Ticket with the
+following possible outcomes:
+
+Stub    SOSES Code          Description
+CPL     OP-S-REQUEST_CPL    Request was completed as filed
+RJT     OP-F-SVC_UNAVAIL    Bad service code
+RJT     OP-F-CB_CONFIG      Case Board configuration unacceptable

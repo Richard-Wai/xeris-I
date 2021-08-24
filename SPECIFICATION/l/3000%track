@@ -1,0 +1,160 @@
+%%!l/2000%track%%:Track Registrar%%%
+
+%%`0%%:Synopsis%%%
+
+The Track Registrar provides a simple, node-local facility for
+establishing and coordinating session streams among various
+secretariats on the node.
+
+Tracks are defined simply with an Administrator and an Agent. The
+Administrator leases a track, and the Agent represents the active
+endpoint of the track.
+
+The Track Registrar has a single desk, and accepts submission to any
+desk ID. The Track Registrar accepts only track tickets.
+
+Any other ticket type will automatically result in a XERIS Standard
+Report Ticket with a RJT stub, and SOSES code of OP-F-UNACPT_ORDER
+(0000/5008).
+
+%%`1%%:Track Query (xst_trak ticket)%%%
+
+A Track Query is a request to "fill-out" a Track Waybill according to
+the provided Track ID. Only the Track Administrator of Record or Agent
+of Record may query a track. Queries on non-existent or disassociated
+tracks will be rejected.
+
+%%`1/1%%:Submission Procedure%%%
+
+xst_trak expectations:
+
+Field           Value
+track           Track ID of Query
+dispatch        Ignored
+sid             Ignored
+dsk             Ignored
+
+If the query is accepted, l/track% will return a Track Waybill. If the
+Query source is the Track Administrator, the SID/DSK pair will
+indicate the Agent of Record. If the query source is the Agent, the
+SID/DSK pair will indicate the Administrator of Record.
+
+%%`1/1%%:Return Conditions%%%
+
+If the query request is successful, l/track% will return a Track Waybill
+in the appropriate direction.
+
+If the query request is not successful, l/track% will return a XERIS
+Standard report ticket with the relevant Stub class, indicating the
+offending condition.
+
+If there is no Agent of Record (Agent has dropped the track), l/track%
+will return a XERIS Standard Report Ticket with a DNY Stub. This
+generally indicates the previous Agent of Record has dropped the track
+via the appropriate Track Administration Request. The Administrator of
+Record may then register a new Agent of Record, transfer the lease, or
+terminate the lease.
+
+
+%%`1/1/1%%:Comprehensive List of Possible Return Conditions%%%
+
+Stub        Content           Description
+TRAK        Track Waybill     Query Return
+UNA         OP-F-NO_RECORD    Query Failed
+DNY         OP-F-NO_OPERATOR  Track has been dropped
+
+
+%%`2%%:Track Lease (xst_tlea ticket)%%%
+
+%%`2/1%%:Submission Procedure%%%
+
+xst_tlea expectations:
+
+Field           Value
+dispatch        Intended initial dispatch number
+admin.dsk       Administrator desk of Record
+agent.sid       Agent Secretariat of Record (SID)
+agent.dsk       Agent Desk of Record
+
+%%`2/1%%:Return Conditions%%%
+
+If the lease request is successful, l/track% will return a Track
+Waybill for the newly leased track.
+
+If the lease request is not successful, l/track% will return a XERIS
+Standard report ticket with the relevant Stub class, indicating the
+offending condition.
+
+%%`2/1/1%%:Comprehensive List of Possible Return Conditions%%%
+
+Stub        Content           Description
+TRAK        Track Waybill     Lease confirmation
+UNA         OP-F-INSUF_RESRC  No tracks available for lease
+
+
+
+%%`3%%:Track Administration Request (xst_tadm ticket)%%%
+
+A Track Administration Request can be submitted by the Administrator
+or the Agent of record for a leased track. The Agent of Record may
+only submit a Drop Track 
+
+%%`3/1%%:Submission Procedure%%%
+
+xst_tadm expectations:
+
+Field           Value
+track           Track ID
+op              Request Option
+
+%%`3/1%%:Request Options%%%
+
+Value   Code    Request
+00      TRM     Terminate Lease (Admin) / Drop Track (Agent)
+01      XFR     Transfer Lease
+02      RED     Redirect (update Agent)
+03      DSP     Update dispatch
+
+%%`3/1/0%%:Terminate Lease / Drop Track%%%
+
+If this option is submitted by the Administrator of Record, the track
+lease will be terminated. If submitted by the Agent of Record, the
+Agent will be released from the track.
+
+This is the only option that is accepted from the Agent of Record.
+
+There are no associated parameters with this request.
+
+%%`3/1/1%%:Redirect (update agent)%%%
+
+This option can only be submitted by the Administrator of Record. This
+operation is used to update the Agent of Record for an administered
+track lease.
+
+The following parameters are required:
+
+Field        Description
+agent.sid    New Agent Secretariat of Record
+agent.dsk    New Agent Desk of Record
+
+%%`3/2%%:Return Conditions%%%
+
+Track Administration Requests always result in a XERIS Standard Report
+Ticket returned with the appropriate SOSES code and Stub.
+
+%%`3/2/1%%:Comprehensive List of Possible Return Conditions%%%
+
+Stub        Content             Description
+ACP         OP-S-ACCEPTED       Request complete
+UNA         OP-F-NO_RECORD      Request failed
+UNA         OP-F-NO_OPERATOR    Track has no agent (XFR only)
+DNY         OP-F-NO_AUTH        Now allowed from agent
+RJT         OP-F-OPTION_UNKN    Option is not recognized
+
+
+
+
+
+
+
+

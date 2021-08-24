@@ -1,0 +1,187 @@
+%%?xeris%%%
+
+%%*X3S%%:XERIS Specification Stream Standard%%.0%%,1%%%
+
+%%`1%%:SYNOPSIS%%%
+
+XERIS/APEX is a fundamentally specified system. As such, this master
+specification lays-out the basic specification for the specification
+system itself and framework. Though there need-not be any centralized
+specification for all of XERIS/APEX and derivatives, this
+implementation allows for a universal format and machine-readable
+processing procedures.
+
+The XERIS/APEX Specification does not specify a common data format or
+storage message. The data may be transmitted and stored any way deemed
+appropriate. The only requirement is that the transmission always be a
+sequential stream.
+
+%%`%%:Bursts%%%
+
+Specification streams are fundamentally divided into a series of
+"bursts", which are the actual content of the specification, delinted
+with a string of BUST DELINEATORs.
+
+%%`/%%:Burst Delineation%%%
+
+Specification data in a steam are assigned to appropriate
+PARTITION/ELEMENT/SECTIONS in a package with BURST DELINEATORS. BURST
+DELINEATORs are indicated with two consecutive '%' symbols, followed by
+a single classifier symbol. The classifier symbol indicates a
+delineation class, and is followed immediately by the associated data
+for that delineation. Data is confined by the next BURST DELINEATOR or
+by a null delineator (three consecutive '%' symbols). The classifier
+'\' always resolves directly to a '%' in the steam. That is to say
+"%%\%%\\" is replaced by '%%\' in the steam, and is otherwise not
+considered to be a BURST DELINEATOR.
+
+BURST DELINEATORs have a primary and secondary function. The primary
+function is to define PACKAGE,PARTITION,ELEMENT, and SECTION of a
+given burst. The secondary function is to provide descriptive
+information such as element identification, description, revision
+number, section number, and many others, as described in this
+specification.
+
+
+%%`%%:Partitions%%%
+
+Specifications must have an associated package. Packages may be
+collapsed by the system, but all specifications must identify a
+package. Package names are not case-sensitive. The package 'xeris' is
+reserved for the core XERIS/APEX Release Specification. A package is
+devided into two PARTITIONs: STANDARDS (?) and OPERATION (!).
+
+Each PARTITION consists of a hierarchical set of ELEMENTS in a
+hierarchical tree of that mimics the Human Reference Notation
+Specification (HRNS) as implemented by the XERIS/APEX Core/Human
+Affairs Secretariat (see xeris?man%hrns`). An ELEMENT represents a
+single descriptive or operational component specification unit. An
+ELEMENT may parent a legacy of SECTIONs, which further allow
+organization of the component specification, as needed. SECTIONS cannot
+parent ELEMENTs, and all sections must share a common ancestral
+ELEMENT. SECTIONs may have legacies of other SECTIONS.
+
+There are two BURST DELINEATOR classes for each of the two types of
+partition. The BURST DELINEATOR for partitions is also responsible for
+defining the package for which it is a member of. This allows for
+single partition packages. Where the package name is not provided, it
+is derived from the current package name. If a package name is not
+provided at the start of the steam, the steam shall be considered
+illegal and shall not be processed.
+
+%%`/%%:Standards Partition (%%\%%\?)%%%
+
+The STANDARDS partition contains higher-level standards, concepts,
+principals, or similar specifications that are used primarily to
+better understand the functionality and interface, but not the use of
+the associated package operational components.
+
+STANDARDS partitions are delineated with a BURST DELINEATOR classifier
+of '?'
+
+%%`/%%:Operations Partition (%%\%%\!)%%%
+
+The OPERATION partition contains specific function description or
+operational instructions for the associated operational components
+specified by the package.
+
+OPERATION partitions are delineated with a BURST DELINEATOR classifier
+of '!'
+
+%%`%%:Elements%%%
+
+ELEMENTs represent broadly any given component specification or
+operational description. ELEMENTs are named, and can be organized
+hierarchically, but only as conforms with the Human Relations
+Secretariat's Human Reference Notation Standard (see xeris?man%hrns*)
+
+Elements are indicated through the appropriate BURST DELINEATOR code
+as listed below. Each element shall also include a reference
+identifier as the argument to its delineation code. Element codes
+follow HRNS.
+
+BURST DELINEATOR	    ELEMENT CLASSIFIER
+'%'			            Secretariat
+'$'	                    Operator
+'#'			            Service Code
+'&'			            Parameter
+'/'			            Logical Branch
+'#'			            Local reference
+'!'			            Comment
+'*'			            Standard
+
+
+%%`//%%:Secretariat '%'%%%
+
+Secretariat ELEMENTs are generally used to refer to the associated
+secretariat. The delineation should be given a reference designator as
+the delineator argument. The designator should match the HRT reference
+of the associated Secretariat.
+
+In typical use, Secretariat classifiers serve as a "top level", as
+Secretariats are the fundamental module of the XERIS/APEX system.
+
+%%`//%%:Operator '$'%%%
+
+Operator ELEMENTs generally refer to the associated Operator within a
+parent Secretariat. The delineation should be given a reference
+designator as the delineator argument. The designator should match the
+HRT reference of the associated Operator.
+
+In typical use, Operator Classifiers provide additional information
+about the function (STANDARDS) or operation of the particular
+operator.
+
+%%`//%%:Service Code '&':%%%
+
+Service Code ELEMENTs generally refer to the associated Service Code
+offered by the parent Operator. The delineation should be given a
+reference designator as the delineator argument. The designator should
+match the HRT reference of the associated Service Code.
+
+In typical use, Service Code Classifiers provide additional
+information about the function (STANDARDS) or operational
+definition/instructions in regards to the use of the associated
+Service Code.
+
+%%%%s%/%d%Burst Packaging%%%
+
+Bursts are contiguous blocks of a complete steam (package) that are
+delineated with Burst Marks. Busts Marks carry a standardized set of
+relational definitions. Bursts are hierarchical, and data not explicitly
+provided in a given Burst Mark is inherited or derived from its
+parent.
+
+Packages shall be considered as a contiguous steam of related bursts.
+Packages cannot be append to each-other in any circumstance. Packages
+shall always be processed in a single, sequential operation. Revised
+packages of a higher revision shall replace existing packages of the
+same qualifier.
+
+Packages can be contained separately or together, as long as the
+package stream's content is processed sequentially. Parallel processing
+of multiple packages in a single container (simultaneous steams) is
+permitted. Nested packages are not permitted.
+
+Bursts that constitute a package are delineated by Burst Marks, which
+both indicate a new burst, and provide data overrides for the
+inherited data of the child Burst. If no data overrides are given, the
+Burst derives all of its information from it's parent, automatically.
+
+Burst must track the following identification information:
+
+1. Package Identifier
+2. Package Sequence
+3. Section Sequence
+3. Tag/Abbreviation
+4. Description
+5. Parent (Package Sequence)
+5. Child (Package Sequence)
+
+
+%%%%s%//%d%Type%%%
+ 
+
+
+
+

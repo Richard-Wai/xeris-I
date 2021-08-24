@@ -1,0 +1,596 @@
+%%!xeris%atria%%*regspec%%:ATRIA General Registration Specification%%%
+
+%%`1%%:Introduction%%%
+
+The most seminal role of ATRIA is the registration of new Secretariats
+within the local node. This specification describes the protocol
+through which ATRIA receives and processes new Secretariat
+Registrations.
+
+%%`2%%:Registration Tags%%%
+
+ATRIA Registration Tags are a standardized set of tickets which
+provide the necessary registration information for the dynamic loading
+and registration of new Secretariats with a XERIS/APEX node.
+
+A Registration Package is a conceptual collection of data
+(instructions, and initialized memory) that are maintained at
+source. ATRIA then makes use of a special set of XERIS Standard
+Tickets, known as Registration Tags, specified in this specification
+to procedurally load, commission, and register a new Secretariat.
+
+Registration Tags are represented by a set of private XERIS Tickets
+specified in this specification, and summarized as follows:
+
+STUB      Code     Tag Name
+TAG_PRT   0xf0     Partition Tag
+TAG_ADR   0xf1     Address Tag
+TAG_UNI   0xf2     Unit Tag
+TAG_COM   0xf3     Commission Tag
+TAG_DAT   0xf4     Data Tag
+TAG_MAN   0xf5     Human Reference Tag
+
+TAG_XFR   0xf6     Transfer Slip
+
+Each Tag type is itself identified by a category-specific Tag
+Identification Number (Tag ID). Tags are always arranged as contiguous
+vectors of a reserved address space provision that correlates with the
+tag type. The Tag ID is a 16-bit unsigned integer. No IDs are
+reserved.
+
+The Tag Identification Number (ident) always occupies the first 16
+bits of every Registration Tag. However, the ident value of any
+Registration Ticket refers only to a position in a vector of
+like-stubbed tickets, which always begins at ident 0x0001, and shall
+always be contiguous.
+
+A Tag Identification of 0x0000 is reserved for all stubs, and shall
+either never be present, or always be present, in accordance with the
+stub-specific specification found in Section 2.
+
+%%`2/1%%:Parition Tag%%%
+
+Partition Tags describe address spaces referenced by a Secretariat
+during registration, commissioning, and service. The address space of
+a partition should be considered physically distinct from all other
+partitions, but may be implemented logically. A partition is defined
+by a single define role, purpose, function, use, or property.
+
+Partition Tags 0x0000 - 0x1fff are reserved for global partition types
+that are provided by the XERIS/APEX Specification. The current
+collection of reserved partitions are described in this section, and
+include:
+
+Ident   Code     Description
+0x0000  NUL      Null partition
+0x0001  EXE      Executive Partition
+0x0002  OP1      First Operations Partition
+0x0003  OP2      Second Operations Partition
+0x0004  REF      Static Reference Partition
+0x0005  SYS      System/Control Partition
+0x0006  XFL      Trans-FLATLINE Partition
+0x0007  MAN      Human Reference Partition
+
+All XERIS/APEX nodes must recognize NUL,REG, and EXE partitions at a
+minimum, and are recommend to recognize NUL, REG, EXE, INI, and OPR
+at a minimum.
+
+All partitions must have a link to a partition of a lesser
+identification, except for the NULL partition, which links to itself.
+
+XERIS/APEX Standard Partitions are described in more detail in the
+ident field specification in the next subsection.
+
+%%`2/1/1%%:Partition Tag Specification%%%
+
+A Partition Tag is a XERIS Standard Ticket with the following fields:
+
+Field    Type      Description
+ident    uint16    Tag ID
+
+word     uint16    [Data Tag]Word size in bits
+align    uint16    [Data Tag]Ultimate alignment (multiples of words)
+ovrly    uint16    [Unit Tag]Overlay Unit
+extnt    uint16    [Address Tag]
+
+%%`2/1/1/1%%:ident Field%%%
+
+The ident field carries the package global Tag Identification number
+for the tag.
+
+In the case of Partition Tags, the ident field may indicate specific
+standardized representations, which are described in this sub-section.
+
+
+
+%%`2/1/1/1/0%%:NUL: Null Partition%%%
+
+The Null Partition is conceptual in nature. It has an infinite address
+space, and always contains a zero value at all locations.
+
+The Null Partition is typically used in the Partition link field
+wherever an actual link does not exist, and ensures full
+zero-initialization of a partition.
+
+%%`2/1/1/1/1%%:EXE: Executive Partition%%%
+
+The Executive Partition represents an immutable instruction space. The
+Executive Parition shall never be modifiable at run-time.
+
+The Executive Partition must be linked to the Registration Partition,
+or is otherwise illegal.
+
+%%`2/1/1/1/2%%:OPR1 and OPR2: Operational Partition%%%
+
+The First and Second Operational Partitions represent a fixed
+reservation of local, random-access, private working memory. The memory
+space will be initialized by ATRIA according to the link field at
+FLATLINE.
+
+Operational Partitions must always have a valid Overlay Unit. An
+Operational Partition Tag with a Overlay Unit value of 0x0000 is
+illegal.
+
+XERIS/APEX requires that all private working memory is explicitly
+initialized during FLATLINE.
+
+%%`2/1/1/1/4%%:REF: Static Reference Partition%%%
+
+The Static Reference Partition represents a fixed reservation of local
+non-volatile, but read-only data. ATRIA may facility modification of
+the partition contents pre-FLATLINE. However, the commissioned
+Secretariat shall not have the ability to directly modify the contents
+of the Static Reference Partition.
+
+The Static Reference partition must be linked to the Registration
+Partition only.
+
+%%`2/1/1/1/4%%:SYS: System/Control Partition%%%
+
+The System/Control Partition is architecture/implementation-specific,
+but generally represents a register-mapped space for control of the
+system and or peripheral devices.
+
+The meaning and application of a link value is
+architecture/implementation-defined.
+
+%%`2/1/1/1/5%%:XFL: Trans-FLATLINE Partition%%%
+
+The Trans-FLATLINE Partition represents a private reserved,
+implementation-specific random-access memory space which is preserved
+over FLATLINE events.
+
+
+%%`2/1/1/1/6%%:MAN: Human Reference Partition%%%
+
+The Human Reference Partition contains a single UTF-encoded octet
+string of human-readable characters. Human Reference Tags included in
+the Package reference specific slices in the target array. Encoding
+that is not UTF-8 shall have the appropriate encoding markers at the
+beginning of the partition.
+
+The Human Reference Partition must always have a word size of
+8-bits.
+
+This partition may be ignored by at the discretion of the target node.
+
+%%`2/1/1/2%%:word Field%%%
+
+The word field carries a Data Tag ID, which itself carries the word
+size of the provisioned address space, in bits. Endianness shall be
+global for a package wherever it is relevant. The endianness shall
+match that indicated in Data Tag 0x0000
+
+A word value referring to Data Tag 0x0000 is invalid and indicates that
+the partition tag is inactive and shall be ignored.
+
+%%`2/1/1/3%%:align Field%%%
+
+The align field carries a Data Tag ID, which itself carries an
+integral required physical alignment, in words.
+
+A align value referring to Data Tag 0x0000 is invalid and indicates
+that the partition tag is inactive and shall be ignored.
+
+%%`2/1/1/4%%:ovrly field - Unit Overlay%%%
+
+The Unit Overlay field contains a Unit Tag ID which points to a Unit
+Tag which must have the same size as the partition to which it is
+related.
+
+A Unit Tag ID of 0x0000 indicates that there is no overlay.
+
+%%`2/1/1/5%%:extnt field%%%
+
+The extnt field carries an Address Tag identification which must be
+self referencing to the Partition. The address identified in the extnt
+field shall be the last accessible word of the Partition.
+
+A extnt value refering to Address Tag 0x0000 is invalid and indicates
+that the partition tag is inactive and shall be ignored.
+
+%%`2/2%%:Address Tag%%%
+
+Address Tags address a specific word in a Partition. Address tags also
+provide identification information for linking purposes
+
+%%`2/2/1%%:Address Tag Specification%%%
+
+An Address Tag is a XERIS Standard Ticket with the following feilds
+
+Field    Type      Description
+ident    uint16    Tag ID
+
+part	 unit16	   [Parition Tag]Referenced partition
+segt	 uint16	   [Data Tag]Segment Number (x 0x10000000000000000)
+offs	 uint16	   [Data Tag]Word offset into segment
+unit	 uint16    [Unit Tag]Associated unit
+
+%%`2/2/1/1%%:ident: Tag Identification Field%%%
+
+The Tag Identification Field is unique for each Address Tag in a
+Registration Package.
+
+Address Tag 0x0000 is reserved. Its meaning shall never be considered
+as a valid address, and typically indicates the lack of an assigned
+address.
+
+%%`2/2/1/2%%:part: Referenced Partition%%%
+
+The 'part' field contains a Partition Tag Identification which
+identifies the target partition for which the address applies.
+
+%%`2/2/1/3%%:segt: Segment Number%%%
+
+The segment number contains a Data Tag Identification, which itself
+contains a 64-bit unsigned number which is effectively an offset prefix
+of 0x1 0000 0000 0000 0000. That is to say, each segment represents a
+64-bit address segment.
+
+A Data Tag Identification of zero indicates Segment 0.
+
+%%`2/2/1/4%%:offs: Word Offset%%%
+
+The 'offs' field contains a Data Tag Identification, which itself
+contains a 64-bit unsigned number which represents the offset into the
+referenced Partition, and specified 64-bit address segment.
+
+The segment value refers to one word of the referenced Partition.
+
+The address 0x0000 0000 0000 0000 points to the first word in the
+Partition.
+
+An 'offs' field of zero (Data Tag 0x0000) indicates an unreferenced
+address. Valid addresses must always be presented in a valid Data Tag
+who's identification is not zero.
+
+%%`2/2/1/5%%:unit: Associated Unit%%%
+
+The 'unit' field is optional. A value of zero indicates that there is
+no unit associated with the address.
+
+The referenced Unit Tag shall also reference the Address Tag, or else
+both are illegal.
+
+Refer to the Unit Tag specification for further information.
+
+%%`2/3%%:Unit Tag%%%
+
+Unit Tags describe a specific region of data within a partition, and
+facilitate functional identification of that region, including an
+associated "batch" of Commission Tags.
+
+Unit Tags provide a specific region of data which serves as a specific
+link-time reference, usually used in the commissioning process, and
+generally referenced from Commission Tags, but are also commonly used
+in Transfer Slips.
+
+Unit Tags refer to a single, contiguous region within a specific
+Partition.
+
+All Address Tags identified in a Unit Tag shall reference that Unit
+Tag. All Address Tags which reference a Unit Tag must be explicitly
+referenced by the Unit Tag, or are otherwise illegal.
+
+%%`2/3/1%%:Unit Tag Specification%%%
+
+A Unit Tag is a XERIS Standard Ticket with the following fields:
+
+Field    Type      Description
+ident	 uint16	   Unit Tag ID
+
+top      uint16	   [Address Tag] Low Word of the unit
+bot	     uint16	   [Address Tag] High Word of the unit
+com	     uint16	   [Commission Tag] Unit Commission Batch
+man	     uint16	   [Human Reference Tag] Human Reference
+
+%%`2/3/1/1%%'ident': Unit Tag Identification%%%
+
+The Unit Tag Identification field is unique for each Unit Tag in a
+Registration Package.
+
+Unit Tag 0x0000 is reserved. Its meaning shall always be interpreted
+as there being no associated Unit Tag.
+
+Unit Tag 0x0000 shall not exist in a Registration Package. The first
+Unit Tag in Registration Package shall have Identification 0x0001.
+
+%%`2/3/1/2%%:'top': Low Word of the unit%%%
+
+The 'top' field contains an Address Tag Identification, which must be
+non-zero. The 'top' Address Tag indicates the 'first' word of the
+Unit. The 'first' word shall be interpreted as the lowest addressed
+word of the Unit.
+
+%%`2/3/1/3%%:'bot': High Word of the unit%%%
+
+The 'bot' field contains an Address Tag Identification. The 'bot'
+Address Tag indicates the 'last' word of the Unit. The 'last' word
+shall be interpreted as the highest addressed word of the Unit.
+
+An Address Tag Identification of 0x0000 for the 'bot' field indicates
+that the unit has an unspecified size, but begins at the address
+indicated in 'top'. If the Unit is a single word in size, 'bot' shall
+be equal to 'top'.
+
+%%`2/3/1/4%%:'com': Commission Batch%%%
+
+The Commission Batch is the Commission Tag Identification for the
+first in a linear vector of commission tags, which shall constitute an
+inclusive, contiguous vector of all Commission Tags which use the Unit
+as a reference.
+
+Commission tags must always be sorted by referenced unit, though unit
+order is arbitrary.
+
+Unit Tags are not required to have Commission Batches assigned. A
+Commission Tag Identification of 0x0000 indicates the Unit has no
+Commissions. 
+
+%%`2/3/1/5%%:'man': Human Reference%%%
+
+The Human Reference field references a Human Reference Tag, which
+provides Human-Friendly referencing information to help identification
+of the Unit.
+
+A Human Reference Identification of 0x0000 indicates that there is no
+associated Human Reference Tag for the Unit.
+
+%%`2/4%%:Commission Tag%%%
+
+Commission Tags carry information for the registration of new
+Secretariats on a target Node. There are a series of generic
+Commission Tag types described in this standard, but target- or
+implementation-specific tags may extend the features as necessary.
+
+Commission tags generally provided information for the proper
+augmentation of referenced instructions such that the physical position
+of relevant Partitions are properly accessed. Their meaning is often
+dependent on the instruction or data with which they are associated
+(via the Endpoint field described below).
+
+A XERIS Standard ATRIA% shall implement all tag types as described in
+this specification.
+
+%%`2/4/1%%:Commission Tag Specification%%%
+
+A Commission Tag is a XERIS Standard Ticket with the following fields:
+
+Field    Type      Description
+ident    uint16    Tag ID
+
+type     uint16    Commission Tag Type
+endp     uint16    Endpoint [Address Tag ID]
+ref      uint16    Reference [Unit Tag ID]
+annx     uint16    Annex [Data Tag ID]
+
+%%`2/4/1/1%%:ident Field%%%
+
+The Commission Tag Identification field is unique for each Commission
+Tag in a Registration Package.
+
+Commission Tag 0x0000 is reserved. Its meaning shall always be
+interpreted as
+
+
+%%`2/4/1/2%%:type Field%%%
+
+The type field carries the Commission Tag type. Types 0000 - 2000 are
+reserved for Generic types.
+
+The Generic types are listed as follows:
+
+Value    Code       Description
+[Data Operations]
+0000     GEN_DDR    Local Dispatch Desk Entry Registration
+0001     GEN_TXA    Transaction Account Registration
+0002     GEN_MAN    Human Reference Table Root Registration
+0003     GEN_ISR    Interrupt Service Registration
+0004     GEN_SEC    Initial Security Levels Registration
+
+000f     GEN_MOD    Direct (Anonymous) Modification
+
+0010     GEN_LDR    Register load from working memory
+0011     GEN_STR    Register store to working memory 
+0012     GEN_LDI    Register load immediate operation
+0013     GEN_ROI    Register operation with immediate
+0014     GEN_STI    Memory store immediate operation
+0015     GEN_LDM    Memory load operand (memory-memory ops)
+0016     GEN_STM    Memory save operand
+0017     GEN_TAM    Memory tertiary/accumulator operand
+
+[Control Operations]
+1000     GEN_SYS    XERIS Call
+1001     GEN_JMP    Control Transfer Operation (jump/call)
+1002     GEN_REL    Relative Control Transfer Operation (PC relative)
+1003     GEN_IND    Indirect Control Transfer
+
+%%`2/1/1/3%%:Endpoint Field%%%
+
+The Endpoint Field is a Tag ID of an Address Tag which points to the
+first addressable unit of the associated instruction. The Endpoint
+must refer to an Address in the Executive Partition only.
+
+%%`2/1/1/4%%:Reference Field%%%
+
+The Reference Field is a Tag ID of an Identification Tag, which
+provides the relevant identification information for the reference to
+which the operation refers.
+
+The Reference Field represents a Unit Tag Identification, which
+indicates a specific region or address in the same or other
+partition. The Reference Field may hold Unit Tag Identification
+0x0000, which indicates there is no reference related to the
+modification. Typically, this means an addend would be applied.
+
+For example: A GEN_LDR type could reference an appropriate object in
+the working memory space, for which the register load instruction must
+reference statically. The unit tag could identify a region or address
+in one of the Operational Partitions, who's location is decided by the
+the commissioning node. generalized working memory "symbol" which could
+be globally referenced during commissioning.
+
+%%`2/1/1/5%%:Annex Field%%%
+
+The Annex field provides static data required to make the appropriate
+adjustment to the endpoint. For example, this could be an index value
+relative to the reference field, an immediate value, or an offset (such
+as for a relative control transfer)
+
+The specific use of the Annex feild depends on the Commission Tag
+type.
+
+
+%%`2/5%%:Data Tag%%%
+
+A Data Tag contains a fixed 64-bit word of data. It's interpretation
+is application-specific. However, there exists three specifically
+reserved Data Tags, of identifications 0x0000 - 0x0002. These
+specifically reserved Data Tags are described later in this section.
+
+
+%%`2/5/1%%:Data Tag Specification%%%
+
+Field    Type      Description
+ident    uint16    Tag ID
+
+data     (uint64)  Payload
+
+
+%%`2/5/1/1%%:ident Field%%%
+
+The Data Tag Identification field is unique for each Data Tag in a
+Registration Package.
+
+Data Tag Identification 0x0000 is reserved for the Bit/Word Order
+Test. This Tag cannot be referenced by any other Tag, and can only be
+requested directly. If any tag references Data Tag Identification
+0x0000, this shall always be taken to mean there is no associated Data
+Tag.
+
+
+%%`2/5/1/1/1%%:Data Tag 0x0000 - Bit/Word Order Test%%%
+
+The Bit/Word Order Test Data Tag, of Identification 0x0000, shall
+always contain a static value which always equals an unsigned, 64-bit
+integer with the value 0xFEDCBA9876543210. The tag shall always be
+stored and transmitted in identical fashion as all other tags.
+
+This allows any party to identify the bit/word ordering used to store
+or transmit the package.
+
+%%`2/5/1/2%%:data Field - Data payload%%%
+
+The data Feild contains the referenced data in a standard XERIS ticket
+encoded format.
+
+%%`2/6%%:Human Reference Tag%%%
+
+A Human Reference Tag provides a simple human-readable name or
+description for Unit Tags. It always references a first and last index
+into the Human Reference Partition. This is always a linear octet
+offset into the partition.
+
+The referenced strings shall be in UTF-8 encoding. 
+
+The referenced strings shall never be assumed terminated by any means
+except the bounds provided by the 'first' and 'last' fields.
+
+%%`2/5/1%%:Human Reference Tag Specification%%%
+
+Field    Type      Description
+ident    uint16    Tag ID
+
+first    unit32    First octet
+last     unit32    Last octet
+
+%%`2/5/1%%:ident Field - Tag Identification Number%%%
+
+The Human Reference Tag Identification field is unique for each Data
+Tag in a Registration Package.
+
+Human Reference Tag Identification 0x0000 is reserved and shall not be
+valid. When referenced from a Unit Tag, it shall indicate that there
+is no Human Reference Tag associated with that Unit Tag.
+
+%%`3%%:Package Tags%%%
+
+Package Tags are specified Tags which have universal interpretation
+and use in any XERIS/APEX Secretariat Registration Package.
+
+This section describes all Package Tag specifications for this version
+of the XERIS/APEX system.
+
+%%`3/1%%:Resource Tags%%
+
+Resource Tags specify the required and assumed memory resources needed
+for the registration of the packaged secretariat on the target node.
+
+The Resource Tags are roughly analogous to "sections" in some binary
+formats, but allow for further abstraction. The abstraction allows the
+XERIS/APEX Secretariat Registration Package Standard to be
+architecture agnostic. Hardware-specific architecture can be
+represented as needed through these abstract resource tags.
+
+Resource Tags delineate contiguous regions of address space which must
+be static at the time of registration. ATRIA will make the appropriate
+reservations in the actual address space.
+
+Resource Tags occupy Tag IDs 0000 - 000f. Resource Tags are always
+Address Tags. Resource Tag 0000 - 0002 are not optional.
+
+Resource Tag 0000 specifically references the entire instruction data
+space. This is analogous to a "text" section. The extents need not
+necessarily define the extent of instructions, and may contain any
+data. For non-harvard architectures, this may be the only dataspace.
+
+Resource Tag 0001 specifically references the working memory (RAM)
+required by the 
+
+
+%%`3%%:Transfer Slip Ticket Description%%%
+
+A Transfer Slip Ticket is a XERIS/APEX Standard Ticket that allows for
+bi-directional, and reliable raw Partition data transfer between
+XERIS/APEX Nodes/Secretariats.
+
+Correct usage of Transfer Slips requires use of the dispatch
+work-board to transfer bulk data. The logistics are the responsibility
+of the ATRIA interfacing secretariat. The only requirement is that a
+transfer must always be an integral multiple of words.
+
+%%`3/1%%:Transfer Slip Ticket Specification%%%
+
+A Transfer Slip XERIS Standard Ticket with the following fields:
+
+Field    Type      Description
+unit     uint16    Unit Tag ID
+
+seq      uint32    Block Sequence
+bsz      uint32    Block size (words)
+
+%%`3/1/1%%:unit - Unit Tag ID%%%
+
+The Unit Tag ID indicates the related unit 
+
+

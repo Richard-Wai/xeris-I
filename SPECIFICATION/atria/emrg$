@@ -1,0 +1,107 @@
+%%!xeris%atria%%$emrg%%:ATRIA% Emergency Lockdown Service%%%
+
+%%`0%%:Introduction%%%
+
+The ATRIA% Emergency Lockdown Service allows for specific tracks to be
+put in a lock-down state. If dispatched to, desk$ will report the
+lock-down status and will not issue a Dispatch Card.
+
+ATRIA% will not execute lockdown requests on the Node Directorate
+(Secretariats 0000 - 0004 inclusive).
+
+%%`1%%:Submission Procedure%%%
+
+EMRG$ accepts only XERIS Standard Service Request Tickets.
+
+EMRG$ always returns a XERIS Standard Service Request Ticket.
+
+Codes 0000 - 00ff are reserved for base specified service, as contained
+within this specification. Implementation specific services may be
+implemented from 0100 and higher.
+
+Base Specified Service Codes:
+
+Code  Service Description
+0000  Execute Lockdown
+0001  Release Lockdown
+0002  Reset (Release All)
+
+An invalid service code results in a xst_rpt return of Spec/Code
+0000/5002 (OP-F-SVC_UNAVAIL).
+
+%%`2%%:Service Code Operational Specifications%%%
+
+%%`/0%%:0000 - Execute Lockdown%%%
+
+The Execute Lockdown service request atomically registers a lock-down
+condition for the indicated Track(s).
+
+The Lockdown can be executed on up to four Tracks simultaneously, and
+all tracks will be locked as a single transaction. Partial locks are
+not executed, and the locking operation will be atomic for all
+indicated tracks.
+
+Tracks within the Core Directorate will be ignored. A value of Zero
+should be placed in unused Track X fields of the Service Request
+Ticket.
+
+Service Request Ticket Fields:
+Field   Value
+rqc     0000
+p16[0]  Track 1
+p16[1]  Track 2
+p16[2]  Track 3
+p16[3]  Track 4
+
+This service will always return a XERIS Standard Report Ticket of the
+following possible configurations:
+
+Spec/Code    Human Code         Indication
+0000/0002    OP-S-REQUEST_CPL   Request Complete
+0000/5012    OP-F-INSUF_RESRC   Insufficient resources to complete
+0000/5009    OP-F-NO_TRACK      One or more requested tracks incorrect
+
+
+%%`/0%%:0001 - Release Lockdown%%%
+
+The Release Lockdown service request atomically removes a lock-down
+condition for the indicated Track(s).
+
+A Lockdown can be released on up to four Tracks simultaneously, and
+all tracks will be released as a single transaction. Requests to
+release tracks that are not already in lockdown will be transparently
+ignored. The release operation will be atomic for all indicated
+tracks. 
+
+Tracks within the Core Directorate will be ignored. A value of Zero
+should be placed in unused Track X fields of the Service Request
+Ticket.
+
+Service Request Ticket Fields:
+Field   Value
+rqc     0000
+p16[0]  Track 1
+p16[1]  Track 2
+p16[2]  Track 3
+p16[3]  Track 4
+
+This service will always return a XERIS Standard Report Ticket of the
+following possible configurations:
+
+Spec/Code    Human Code         Indication
+0000/0002    OP-S-REQUEST_CPL   Request Complete
+0000/5012    OP-F-INSUF_RESRC   Insufficient resources to complete
+0000/5009    OP-F-NO_TRACK      One or more requested tracks incorrect
+
+%%`/0%%:0002 - Reset (Release All)%%%
+
+The reset operation indiscriminately re-initializes all lockdown
+states, removing any and all lockdowns that may be active
+
+This request cannot fail
+
+This service will only return a XERIS Standard Report ticket of the
+following configuration:
+
+Spec/Code    Human Code         Indication
+0000/0002    OP-S-REQUEST_CPL   Request Complete

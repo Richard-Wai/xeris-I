@@ -1,0 +1,177 @@
+%%!f/1005%rdc%%:Recurrent Dispatch Commission%%%
+
+%%`0%%:Synopsis%%%
+
+The Recurrent Dispatch Commission is a public facility for the
+registration of recurrent "polling"-type event triggers that are
+cyclically, and repetitively triggered over an indefinite period.
+
+The generic implementation is quite flexible and scalable, however a
+simple interface allows the module to be easily customized.
+
+%%`0/1%%:Operational Overview%%%
+
+Secretariats may submit a custom event ticket to rdc% apply for
+registration. If registration is successful, the ticket will be
+entered into the dispatch FIFO queue.
+
+One or more cyclic shotcards registered by rdc% attempt to release one
+dispatch from the dispatch queue at each run. The released event ticket
+is copied to a new public shotcard with rdc% as the client, and entered
+onto a command queue.
+
+Upon return, the registrant may "confirm" the event to have it
+re-entered onto the dispatch queue. Otherwise, the dispatch is freed.
+
+It is intended that the action triggered by a rdc% event dispatch is
+for simple polling operations, and that any ultimate action therein
+undertaken be done so by submitting a separate shotcard, and then
+releasing or confirming the event card separately.
+
+rdc% is capable of running multiple agents on different cyclic queues
+to prevent any blocking actions. All agents pull from the same
+dispatch queue. 
+
+%%`0/1%%:Desk Summary%%%
+
+Desk    HRT Symbol      Description
+0000    sub$            Submission desk
+0001    ctl$            Control desk
+
+(Internal Desks)
+0002    agt$            Dispatch Agency
+0003    txp$            Transaction Reception
+0004    txe$            Transaction Executive
+
+The internal desks are not accessible externally. Attempts to do so
+always result in a rejection
+
+%%`1%%:sub$ - Submission Desk%%%
+
+%%`1/0%%:Submission Procedure%%%
+
+The submission desk accepts new registration requests for entry onto
+the Recurrent Dispatch Queue. sub$ only accepts XERIS Standard Event
+tickets with a "EVT" Stub. Any other submissions will be rejected.
+
+rdc% will save a copy of the Event Ticket in it's submitted form,
+except for the "sid" field, which will be automatically over-written
+with the registrant's SID. Upon dispatch from rdc%, this event ticket
+will be dispatched as submitted, to the indicated desk of the
+registrant. rdc% does not increment the sequence number.
+
+%%`1/1%%:Possible Submission Returns%%%
+
+sub$ will only ever return XERIS Standard Report Tickets of the
+following possible configurations:
+
+Stub   SOSES               Description
+ACP    OP-S-ACCPTED        Trigger has been entered into the queue
+UNA    OP-F-INSUF_RESRC    No more available slots in the queue
+UNA    OP-I-INIT_REQUIRED  RDC has not been initialized
+RJT    OP-F-UNACPT_ORDER   Submission is not an event ticket
+
+%%`1/2%%:Confirmation and Cancellation%%%
+
+rdc% will eventually submit a queued dispatch as a CMD shotcard to an
+rdc% dispatch agent. The agent then forwards the event ticket to the
+registrant. When a dispatch is released, it is removed from the
+dispatch queue and held in a confirmation queue until the event is
+confirmed or canceled by the agent.
+
+%%`1/2/1%%:Confirmation%%%
+
+Confirmation is achieved by returning a XERIS Standard Event Ticket
+with the same "sid" field as the original event. If such a return is
+received, the dispatch ticket will be updated with the returned "dsk",
+"ref", and "seq" values, allowing for conditional routing within the
+registrant. If the dispatch is confirmed, it will be placed back into
+the dispatch queue.
+
+%%`1/2/2%%:Cancellation%%%
+
+If the dispatch agent receives a return that does not meet the
+criteria for confirmation, the dispatch is canceled.
+
+%%`2%%:ctl$ - Control Desk%%%
+
+%%`2/0%%:Submission Procedure%%%
+
+The Designated Controller may submit a relevant XERIS Standard Service
+Request ticket to set a new value for the relevant configuration
+register, or alternately execute a management action.
+
+Submissions to the Control Desk from Secretariats that are not the
+Designated Controller are denied. Submissions from the Designated
+Controller that are not XERIS Standard Service Request Tickets are
+rejected.
+
+Unless otherwise customized, the default controller shall be 0004%STRAP.
+
+%%`2/1%%:Management Actions%%%
+
+SVC    HRT Selector     Description
+0000   INIT&            Initialize queues
+0001   AGENT&           Register new agent
+0002   CTRL&            Set Controller SID
+
+%%`2/1/0%%:INIT& - Initialize Queues%%%
+
+The INIT& service request does not take any parameters. This service
+request will cause rdc% to initialize all queues. This service cannot
+be invoked more than once after the FLATLINE event.
+
+It is recommended that INIT& must be invoked for rdc% services to be
+made available.
+
+%%`2/1/0/1%%:Possible Results for INIT& submissions%%%
+
+Stub   SOSES               Description
+CPL    OP-I-INIT_OK        Init completed successfully
+RJT    OP-I-INIT_ILLEGAL   Init completed prior
+
+%%`2/1/1%%:AGENT& - Register new agent%%%
+
+AGENT& instructs rdc% to attempt to register a new cyclic shotcard
+with SIPLEX%. A permit may also be passed as an parameter to register
+the shotcard on non-mainline queues.
+
+%%`2/1/1/1%%:Parameters%%%
+
+Parameter    Type      Description
+p16[0]       uint16    Permit number
+
+%%`2/1/1/2%%:Possible Results for AGENT& submissions%%%
+
+Stub   SOSES               Description
+CPL    OP-S-OPR_OK         SIPLEX% Accepted the shotcard submission
+UNA    OP-F-INSUF_RESRC    SIPLEX% could not provide a free shot
+RJT    OP-F-NOT_PERMITTED  SIPLEX% rejected the permit
+DNY    OP-F-NO_AUTH        Insufficient security level to submit shotcard
+
+%%`2/1/2%%:CTRL& - Set Controller SID%%%
+
+The CTRL& service request configures the SID of the Designated
+Controller. The default Designated Controller post-FLATLINE is STRAP%
+(0004%)
+
+%%`2/1/2/1%%:Parameters%%%
+
+Parameter    Type      Description
+p16[0]       uint16    Designated Controller SID
+
+%%`2/1/2/2%%:Possible Results for AGENT& submissions%%%
+
+Stub   SOSES               Description
+CPL    OP-S-REQUEST_CPL    Designated Controller Changed
+
+%%`2/1%%:General Failure Returns%%%
+
+Stub SOSES             Description
+RJT  OP-F-SVC_UNAVAIL  Bad Service Request Code
+RJT  OP-F-NO_OPERATOR  Bad desk RJT OP-F-UNACPT_ORDER Bad Work Order
+(wrong ticket type)
+DNY OP-F-ACCESS_DENIED Not designated controller or insufficient security
+
+
+                           

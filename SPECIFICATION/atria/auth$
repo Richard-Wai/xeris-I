@@ -1,0 +1,53 @@
+%%!xeris%atria%%$auth%%:ATRIA Authorization Registration Service%%%
+
+%%`0%%:Introduction%%%
+
+The ATRIA Authorization Registration Service module (atria%auth$)
+provides authorization assessment of the dispatch next-hop route
+configuration.
+
+ATRIA%AUTH$ is fully modular behind the specified behavior described
+within this operational specification. There is no conceptual
+specification for the auth$ module, and the operational specification
+is deliberately simple, to allow wide implementation flexibility.
+
+
+%%`1%%:Submission Procedure%%%
+
+AUTH$ accepts only a XERIS Standard Service Request Ticket (xst_srq),
+and responds only with a XERIS Standard Report Ticket (xst_rpt).
+
+AUTH$ may provide additional implementation-specific services as
+needed. The below-listed service codes are required for the proper
+function of the XERIS/APEX nodal core ("FOSA").
+
+Codes 0000 - 00ff are reserved for XERIS/APEX specified services.
+
+The service requests codes accepted by AUTH$ are as follows:
+
+Code       Service Description
+0000       Current-Outbound Route Assessment
+
+
+An invalid service code results in a xst_rpt return of Spec/Code
+0000/5002 (OP-F-SVC_UNAVAIL).
+
+%%`2%%:Service Code Operational Specifications%%%
+
+%%`/0%%:0000 - Tri-Track Route Assessment%%%
+
+Service Request Ticket Fields:
+
+Field     Value
+rqc       0000
+p16[0]    Current Track
+p16[1]    Outbound Track
+
+Report Ticket Return Configurations:
+
+Manifest  Spec/Code    Human Code       Indication
+RPT       0000/0007    OP-S-AUTH_OK     Route is authorized
+RPT       0000/500a    OP-F-NO_AUTH     Route is not authorized
+RPT       0000/5009    OP-F-NO_TRACK    Route is invalid
+
+

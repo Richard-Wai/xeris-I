@@ -1,0 +1,39 @@
+%%!xeris%opsec%%$supr%%%
+
+%%:OPSEC% Dispatch Supervisor (super$)%%%
+
+%%`0%%:Executive Summary%%%
+
+The supervisor represents the local OPSEC% interface presented to a
+dispatch. Ordinarily, OPSEC% itself is inaccessible to all except the
+highest security level Secretariats. However SUPER$ is universally
+acceptable.
+
+When a dispatch makes a XERIS call to OPSEC%SUPER$ (0000%0000$), the
+Case File is transferred directly to SUPER$. Any other XERIS call to
+0000% will result in a normal Case File transfer to OPSEC% through
+OPSEC%'s Dispatch Desk.
+
+SUPER$ Provides a collection of standard operational features to allow
+simple dispatch flow and Tier Horizon interfacing. The two primary
+facilities provided by SUPER$ are:
+
+1. Transaction Control, and
+2. Standard Services Advice
+
+%%`1%%: Transaction Control%%%
+
+Transaction Control services provided by OPSEC% allow Operators to
+delineate serialized procedures which are not to be entered
+simultaneously.
+
+Transaction Control has two phases: Post, and Commit.
+
+When an Operator posts a transaction, they provide a related Signal
+object reference to OPSEC%SUPER$. After posting the transaction, the
+Operator can then be assured that no other dispatch in the local
+jurisdiction will execute the same transaction until the transaction
+is Committed. 
+
+
+

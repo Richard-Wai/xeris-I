@@ -1,0 +1,85 @@
+%%!xeris%opsec%%$xfm%%%
+
+%%:OPSEC% Executive Fleet Marshal (XFM$)%%%
+
+%%`0%%:Executive Overview%%%
+
+The Executive Fleet Marshal handles the progression of "Trucks" within
+a single executive core. Under the assumption that a single opsec% is
+assigned to its own executive core, XFM$ provides the marshaling
+services to the rest of OPSEC%, as well as fleet maintenance
+functions for FLATLINE% and MPL%.
+
+XFM$ is responsible only for atomically updating the marshal-out truck
+registration file on marshal-out, as well as setting the immediate
+truck registration file pointer in the OPSEC Central Account.
+
+%%`1%%:Operational Overview
+
+XFM$ Provides only a single operation, which is to marshal-out the
+current Truck, and then marshal-in the indicated Truck.
+
+XFM$ is only accessible from within opsec%, without exception. For
+this reason and also for performance considerations, XFM$ does not
+receive or return a standard or non-standard ticket. XFM$ receives
+directly an xfm_trf pointer, and returns in kind.
+
+XFM$ will check the stack limit and update the Truck Registration File
+accordingly to indicate a Warning or Excursion. XFM$ will then check
+the marshal-in file for a "Active" or "Warning" Status. If it finds
+any other status, XFM$ will abort the marshal (transparently).
+
+If the marshal-in truck matches the immediate TRF, the only adverse
+affect would be wasted cycles. It is the responsibility of OPSEC%XS$
+and OPSEC%INT$ to properly delegate marshal orders.
+
+%%`2%%:Standard of Return%%%
+
+XFM$ will always return an xfm_trf pointer, indicating the marshal-out
+Truck of the entrant marshal. If the marshal was aborted, the returned
+"marshal-out" Truck reference would be identical to the Immediate
+Truck.
+
+%%`3%%:Truck Registration File Specification%%%
+
+The Truck Registration File (xfm_trf) is intended to carry a single
+Dispatch, and allows for opsec% to schedule the executive core to
+multiple simultaneous dispatches by marshaling trucks.
+
+The Truck Registration File sets out a stack frame via a base, mark,
+and limit pointer.
+
+The Truck Registration File also allows status indications and
+monitoring for containment of stack overflows, as well as allowing
+Total Context Transfers in and out of an Executive Core.
+
+Trucks are referenced by the Dispatch File to which they are assigned,
+but do not reference any assignment internally. Trucks are provided
+externally, and generally provisioned through the actions of the
+Mission Planning Liaison secretariat (MPL%).
+
+OPSEC% allocates a truck internally for its own operations to avoid
+inadvertent stack exhaustion, particularly during interrupt service
+routines (int$) and the Operational Scheduler (os$).
+
+%%`/1%%:xfm_trf%%%
+
+Element    Size          Description
+bas        (void *)      Stack frame base pointer
+mrk        (void *)      Stack frame marshal position
+lim        (void *)      Stack frame limit pointer
+sta        16 bits       Truck status code
+das        (void *)      Pointer to assigned Dispatch File
+crt        (void (*))    Dispatch Certificate
+
+%%`//1%%:Status Code Specification%%%
+
+Value    Code     Description
+0000     NSV      Truck is not in service
+0001     AVL      Truck is available
+0002     ACT      Truck is activated
+0003     WRN      Stack approaching limit warning
+0004     XCR      Stack excursion alarm
+0005     SEZ      Truck has been seized
+0006     CNT      Truck is under containment
+

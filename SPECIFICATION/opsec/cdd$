@@ -1,0 +1,54 @@
+%%!xeris%opsec%%$cdd%%%
+
+%%:OPSEC% Central Dispatch Desk (CDD$)%%%
+
+%%`0%%:Overview%%%
+
+The OPSEC% Central Dispatch Desk is directly analogous to the standard
+"Local Dispatch Desk", and has an identical role of routing incoming
+Dispatch Orders to the appropriate Operator. The distinguished name
+exists due to its unique access method compared to other local
+Secretariats, as being the only Dispatch Desk accessible directly by
+all Secretariats under OSPEC%'s jurisdiction.
+
+Indeed, the Central Dispatch Desk is, as the name implies, the first
+stop for all outbound Dispatch Orders.
+
+%%`1%%:Track Groups%%%
+
+As with all XERIS/APEX complaint Secretaries, the Dispatch Desk routes
+inbound Dispatch Orders via Static and Dynamic Tracks. However, due to
+the greater powers and responsibilities of OPSEC%, the Static Tracks
+of OPSEC% has some dynamic properties, and the Dynamic Tracks are also
+not universal to all incoming Dispatches.
+
+For these reasons, the Central Dispatch Desk refers to available
+inbound tracks as two groups: Provisioned Tracks, and Leased Tracks.
+
+%%`/1%%:Provisioned Tracks%%%
+
+Provisioned Tracks are a set of guaranteed Static-like tracks that are
+provided to each local Secretariat through the Central Dispatch
+Desk. Unlike "traditional" Static Tracks, the Provisioned Tracks are
+directly associated with the facing Secretariat.
+
+Tracks 0000 to 00FF are reserved for Provisioned Tracks exclusively.
+
+Provisioned Tracks are as follows:
+
+Track     Operator    Assigned Task
+0000      trk$        Track Lease Application Processing
+0001      bcm$        Back-channel Management
+0002      tla$        Telemetry Aggregator
+0003      paac$       Permit Applications and Renewals
+0004      eca$        Unhanded Exception Containment
+0005      cns$        Consignment Management
+
+%%`/2%%:Leased Tracks%%%
+
+Leased Tracks are applied for by any Secretariat in order to open a
+dispatch track to another Secretariat's Operator/Track within OPSEC%'s
+jurisdiction. Leased tracks can have various parameters and limits
+which can be imposed on a Secretariat depending on various
+configurable factors such as Security Level, Resource Limitation, and
+Responsibilities. 

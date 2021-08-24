@@ -1,0 +1,530 @@
+%%?xeris%%*xsts%%:XERIS Standardized Ticket Specification%%.0%%,1%%%
+
+%%`1%%:Introduction%%%
+
+This specification provides global, standardized ticket formats that
+are especially important for the interaction with standardized
+components such as the MVAS "base", 3rd party standardized packages,
+and language support libraries.
+
+Though XERIS/APEX provides full capability to exchange customized
+tickets, it is encouraged where possible to use the standardized
+ticket formats as set out in this specification.
+
+%%`2$$:Standardized Ticket Index%%%
+
+XSTS Type     Section     Name
+xst_nul       3/0         Null ticket
+xst_nst       3/1         Non-standard ticket
+
+xst_srq       4/0         Service Request
+xst_msg       4/1         Message
+xst_rpt       4/2         Report
+xst_tlm       4/3         Telemetry
+xst_evt       4/4         Event Trigger
+xst_chr       4/5         Timespan
+
+xst_pctl      4/10        Control Packet
+xst_pstr      4/11        String Packet
+xst_p808      4/12        8x8-bit payload packet
+xst_p416      4/13        4x16-bit payload packet 
+xst_p232      4/14        2x32-bit payload packet
+xst_p164      4/15        1x64-bit payload packet
+
+xst_trak      4/20        Track Waybill
+xst_tlea      4/21        Track Lease Ticket
+xst_tadm      4/22        Track Admin Ticket
+xst_truk      4/23        Track Truck
+
+%%`3%%:Null and Non-Standard Ticket Specification %%%
+
+%%`3/0%%:Null Ticket (xst_nul)%%%
+
+The null ticket specification provides sets the standard ticket size
+for all dispatch transactions which follow the XSDP Specification for
+Dispatch Orders. Dispatch Orders shall always reference the null
+ticket as the allocated size for any dispatch ticket. Furthermore, all
+tickets exported from any Secretariat absolutely must be of the same
+size as the Null Ticket.
+
+As of XERIS/APEX System I, Release 1, the size of xst_nul shall
+occupy exactly 80 contiguous. For this release, xst_nul is defined as
+being identical to xst_p164.
+
+The xst_nul represents a maximum size. Tickets, standard or
+non-standard may be of a smaller size. Tickets that are exchanged
+between nodes shall always allocated the full size of xst_nul, and may
+never assume any other ticket size. The transmission method for
+tickets is not specified.
+
+%%`3/1%%: Non-Standard Ticket %%%
+
+The Non-Standard Ticket specification allows for
+implementation-specific ticket formats to be exchanged by associated
+secretariats.
+
+Non-standard tickets shall be expected and able to be cast onto a nul
+ticket. Where an operator does not recognize the non-standard ticket,
+it shall treat the ticket as a nul ticket.
+
+Viewed as a standard ticket, xst_nst is defined as being identical to
+xst_nul.
+
+
+%%`4%%:Standard Ticket Specifications
+
+
+%%`4/0:Service Request (xst_srq)%%%
+
+The Standard Request ticket is provided to facilitate simple
+transactions or instruction orders, such as commands, confirmations,
+or synchronization tasks. Basically any operation that does not
+require the exchange of data between two Secretariats.
+
+Principally, a service request includes service code, and parameters.
+
+xst_tlm Ticket Specification:
+
+Field   Size    Type        Description
+rqc     16 bit  uint16      Request code
+
+prm             UNION       Parameters
+.p08[8] 64 bit  8 x uint8    8 bit paramater group
+.p16[4] 64 bit  4 x uint16  16 bit paramater group
+.p32[2] 64 bit  2 x uint32  32 bit paramater group
+.p64    64 bit  uint64      64 bit paramater
+
+
+%%`4/1%%:Standard Message (xst_msg)%%%
+
+The Standard Message ticket is provided to facilitate simple message
+passing, typically between two regularly cooperating
+operators/secretariats. The Standard Message applies a simple
+argument-passing lay-out.
+
+xst_msg Ticket Specification:
+
+Field   Size        Type        Description
+ref     16 bit      uint16      Reference Identifier
+
+arg     64 bit      UNION
+.a08    8x 8 bit    uint8[8]    8-Bit Arguments
+.a16    4x 16 bit   uint16[4]   16-Bit
+.a32    2x 32 bit   uint32[2]   32-Bit
+.a64    1x 64 bit   uint64      64-Bit
+
+The field names are generalized, and the specification does not place
+any limitation or restriction that is particular to this Ticket Type.
+
+
+%%`4/2%%:Standard Report (xst_rpt)%%%
+
+The Standard Report ticket is provided as the primary means to
+transmit or return status messages to between operators. 
+
+While Standard Reports and Telemetry Reports reference the same Report
+Code Specification system, Standard Reports differ from Telemetry
+Reports in their intended usage. Telemetry Reports are intended for
+export from the local node, generally to a higher-tier, a tier
+aggregator, or a parent node. Standard Reports are intended for
+exchange between operators/secretariats with a local node.
+
+xst_rpt Ticket Specification:
+
+Field       Size     Type        Description
+spec        16 bit   uint16      Reference Specification
+code        16 bit   unit16      Code according to Specification
+cond         8 bit   uint8       Condition moving forward
+note         8 bit   uint8       Note of attachment
+adi                  UNION
+.adi08[4]    8 bit   uint8       Additional Information (8 bit) x 4
+.adi16[2]   16 bit   uint16      Additional Information (16 bit) x 2
+.adi32      32 bit   uint32      Additional Information (32 bit)
+
+%%`//1%%:spec - Report Code Specification%%%
+
+The Report Code Specification indicates to which specification the
+Telemetry Code belongs. Specifications 0000 - 02ff are reserved for
+XERIS/APEX Specified Guaranteed Secretariats, and other operationally
+standard status/error codes. A single specification can support 65,535
+separate codes.
+
+The currently specified standard specifications are as follows:
+
+Spec   Description
+0000   Standard Operational Status and Errors Specification (soses)
+
+
+%%`//2%%:code - Report Code%%%
+
+The Report Code is defined in the reference specification.
+
+%%`//3%%:cond - Condition moving forward%%%
+
+The Condition moving forward indicates what may be available/potential
+next-steps following receipt of the report.
+
+Standard Conditions are as follows:
+
+Value    Condition  Description
+00       NRM        Condition is normal, no response expected
+01       FTL        Condition is fatal, no response accepted
+02       WCR        Waiting for correction return
+03       RSB        Re-submission of original expected
+04       ADV        Advise retry or cancel
+05       RTY        Re-try
+06       CNC        Cancel
+07       TAL        Try Again Later (new dispatch), no response accepted
+08       OKY        Condition is non-fatal, no response expected
+
+%%`//4%%:note - Additional Information Descriptor%%%
+
+The Circumstance of the report generally indicates what should be
+expected in the Additional Information field.
+
+The Most Significant Bit is a flag indicating if the additional
+information field is 8-bit (cleared) or 16-bit (set).
+
+Standard Notes are as follows:
+
+Value    Condition  Description
+00       NON        No note - no additional information included
+01       CPR        Code paramater
+02       REF        Reference
+03       STA        State
+04       RET        Return Data/Result
+
+%%`4/3:Telemetry Tickets (xst_tlm)%%%
+
+Telemetry tickets are a specially specified ticket type for the
+transmission of internally/implementation-dependent specified data that
+is intended for immediate processing at the Tier Horizon. Telemetry
+tickets are specifically intended to be exported by ETHER%, which tags
+the originating Secretariat ID for the local node before forwarding
+the ticket to the Tier Horizon via the configured track.
+
+xst_tlm Ticket Specification:
+
+Field  Size     Type        Description
+sid    16 bit   uint16      Secretariat ID, filled by OPSEC
+opr    16 bit   uint16      Operator ID, set by the originator
+cat    8 bit    uint8       Telemetry Category
+pld    8 bit    uint8       Configuration of payload to follow
+spec   16 bit   uint16      Reference Specification
+code   16 bit   unit16      Code according to Specification
+
+%%`//1%%:sid - Secretariat ID%%%
+
+The sid feild is used primarily by upstream nodes to identify the
+source Secretariat. When submitting a Telemetry Ticket, this field
+can be set to any value. If submitted to opsec%trace$ via ST/01 with a
+TLD Manifest, opsec% will write the appropriate identifier to this field
+automatically if on Standard Track 01.
+
+%%`//2%%:opr - Operator ID%%%
+
+This should be set to the operator ID of the issuing operator within a
+given Secretariat.
+
+%%`//3%%:cat - Telemetry Category%%%
+
+The Telemetry Category indicates organizes the Telemetry type into a
+logical category.
+
+Categories are as follows:
+
+Value  Code   Description
+00     IFO    General Information
+01     STS    Status Report - State
+02     STI    Status Report - Initialization
+03     STC    Status Report - Completion
+04     WRN    Status Report - Warning
+05     ERR    Status Report - Error
+06     FEX    Fatal Exception
+07     FER    Fatal Error
+08     UTR    Unexpected Termination
+09     CRI    Critical Event - Upper-tier response required
+
+a0-af  XXX    RESERVED
+
+b0-df  IPS    Implementation - Specific
+
+e0-fe  XXX    RESERVED
+
+ff     DBG    Debug
+
+%%`//4%%:pld - Payload Category%%%
+
+The Payload Category consists of a 7-bit number correlating to a
+specific configuration of the payload to follow.
+
+The Most Significant Bit of the Payload Category is a flag that
+indicates if the payload is a stream, or a single value. If this flag
+is set, opsec%trace$ will open a back-channel, otherwise it will
+return an acknowledgment.
+
+The payload categories are as follows:
+
+Value   Code  Packet Ticket  Description
+00      NPL   -              No payload
+01      STR   xst_808        String - until null or terminated back-channel
+02      OPR   xst_416        Local Node Secretariat/Operator Path
+
+08      UI1   xst_808        uint8
+09      SI1   xst_808        int8
+0a      UI2   xst_416        uint16
+0b      SI2   xst_416        int16
+0c      UI3   xst_232        uint32
+0d      SI3   xst_232        int32
+0e      UI4   xst_164        uint64
+0f      SI4   xst_164        int64
+
+18      UP1   xst_808        Fixed point, unsigned (uint8.uint8)
+19      SP1   xst_808        Fixed point, signed (int8.uint8)
+1a      UP2   xst_416        (uint16.uint16)
+1b      SP2   xst_416        (int16.uint16)
+1c      UP3   xst_232        (uint32.uint32)
+1d      SP3   xst_232        (int32.uint32)
+
+20      IFH   xst_416        IEEE754 - Half precision floating point
+21      IF1   xst_232        IEEE754 - Single precision floating point
+22      IF2   xst_164        IEEE754 - Double precision
+23      IF4   xst_164        IEEE754 - Quadruple precision
+24      IF8   xst_164        IEEE754 - Octuple precision
+
+28      D32   xst_232        IEEE754 - decimal32
+29      D64   xst_164        IEEE754 - decimal64
+2a      D28   xst_164        IEEE754 - decimal128
+
+%%`//5%%:spec - Report Code Specification%%%
+
+The Report Code Specification indicates to which specification the
+Telemetry Code belongs. Specifications 0000 - 02ff are reserved for
+XERIS/APEX Specified Guaranteed Secretariats, and other operationally
+standard status/error codes. A single specification can support 65,535
+separate codes.
+
+The currently specified standard specifications are as follows:
+
+Spec   Description
+0000   Standard Operational Status and Errors Specification (soses)
+
+
+%%`//5%%:code - Report Code%%%
+
+The Report Code is defined in the reference specification.
+
+
+%%`4/4%%:Event Ticket (xst_evt)%%%
+
+Event tickets allow for constant, single-direction event triggering
+operations. Event Tickets are designed to be stored and copied by the
+trigger source. Multiple sources are possible, but generally
+discouraged. The sequence number is intended to be used as a linear
+and cyclic counter that is incremented by the trigger, and checked by
+the handler, to ensure event tickets are not lost.
+
+By categorizing event tickets separately, a Secretariat's Dispatch
+Desk can more easily process incoming event tickets.
+
+xst_evt Ticket Specification
+
+Field     Size    Type        Description'
+sid       16 bit  uint16      Handler SID
+dsk       16 bit  uint16      Handler Desk
+ref       16 bit  uint16      Event Identifier
+seq       32 bit  uint32      Sequence number
+
+%%`4/5%%:Timespan Ticket (xst_chr)%%%
+
+The Timespan ticket is designed to carry a specific span of time from
+a standard point of reference (epoch), in the forward ("future")
+direction only, relative to the epoch. Epochs must be defined as
+timespans forward from earlier epochs. The base epoch (0) is the Plank
+Epoch of the local universe. Standard Epochs shall be defined in this
+specification.
+
+The base unit for the span field is not specified. For all
+human-interfaced systems (direct or indirect), and for any other
+systems that are generally decedent of human design, it is
+recommended that the base unit be assumed to represent an SI second
+(as per caesium-133 hyperfine transition method).
+
+Timespan tickets do not support floating-point values in any
+circumstance. Precision provided via the signed exponent value,
+which is a base-10 exponent, and multiple tickets of different
+exponents can be used to represent a highly precise timespan. Where
+the measured magnitude is fractional compared to a given exponent, the
+span value shall be zero. Where the calculated span value is larger
+than 18,446,744,073,709,551,615, an "overflow" flag is indicated with
+the most significant bit of the epoch field.
+
+xst_chr Ticket Specification
+
+Field     Size    Type        Description
+epoch     8 bit   uint8_t     Standard Epoch reference
+expon     8 bit   int8_t      Exponent (e)
+span      64 bit  uint64_t    Timespan = span * 10^expon
+
+
+%%`4/5/1%%: Standard Epoch References%%%
+
+Epoch (7-bit)   Human Name       Definition
+00              FLATLINE Epoch   Local timespan since measurement
+                                 started for local node.
+01              HORIZON Epoch    Tier Horizon FLATLINE
+02              Plank Epoch      Plank Epoch of local universe
+03              XERIS Epoch      "July 23, 2005, 0 UTC"
+07              UNIX Epoch       "January 1, 1970, 0 UTC"
+
+%%`4/10%%:Control Packet (xst_pctl)%%%
+
+Packets in the XERIS/APEX system are generally intended for
+point-to-point stream, bulk, or async transfers of data between two
+operators. This differs generally from the "traditional"
+package-switch network configuration. In XERIS/APEX, data transfer
+efficiency and flexibility is the primary goal, meaning that payload
+space is maximized per packet. This comes at the sacrifice of
+including control data within each packet. 
+
+To handle some of the roles that would normally be handled by more
+traditional packet headers, as well as to handle general transmission
+control features, the XERIS/APEX Standardized Ticket Standard provides
+a "Control Packet" ticket.
+
+The Control Packet provides bi-directional negotiation between two
+end-points to coordinate payload division and routing, and also to
+handle sequence roll-over.
+
+xst_pctl Ticket Specification:
+
+Field   Size    Type        Description
+seq     16 bit  uint16      Packet Sequence Number
+ctl     16 bit  uint16      Control Code
+fir     16 bit  uint16      Reference Sequence Number (First)
+las     16 bit  uint16      Reference Sequence Number (Last)
+ref     16 bit  uint16      Reference Tag (Code-specific)
+
+%%`//%%:Packet Sequence Number%%%
+
+The Packet Sequence is determined solely by the packet's originator. It
+shall be expected by all recipients that this is the case. The first
+packet sent on any given Track, including Backchannels, shall always
+be zero. 
+
+If the sequence is approaching exhaustion/roll-over, (value approaching
+FFF0), Packets of Sequences FFF1 to FFFF, inclusive, may only be
+control packets. Packets of Sequence FFF1 shall always be of Control
+Code "ROW" (Roll-Over Warn), unless and only unless Packet of Sequence
+FFF1 happens to be a response to an incoming ROW. In that case, the
+ROW must be acknowledged. The control packet shall always be of
+Control Code ROW (Roll-Over Warning). The recipient must then reply
+with either a RAK (Roll-Over Acknowledge) or RTY (Retry). If the
+recipient replies with the RTY, the Sender must acknowledge with RTA
+(Retry Acknowledge). The Sender must then immediately transmit an ROW
+again, to which the Recipient is obliged to acknowledge (RAK), before
+the retry commences.
+
+Both the Sender and Recipient reserve the right to terminate the track
+at any time due to perceived illegal activity.
+
+%%`//2%%:Control Code%%%
+
+The Control Codes offer a range of transmission control facilities to
+ensure reliable data transfers. Additionally, most of the code range
+is unreserved and available for implementation-specific control
+messages.
+
+The Specified / Reserved Code range is 0000 - 1FFF, inclusive.
+
+The List of Specified Codes are as follows:
+
+Value  Code    Description
+0000   SWP     Switch Pipe
+0001   PIP     Init Pipe
+0002   KIP     Kill Pipe
+0003   ACK     General Acknowledge
+0004   NAK     General Not Acknowledge
+0005   ARQ     Acknowledge Required
+0006   RTY     Retry
+
+0010   ROW     Roll-Over Warn
+0011   RAK     Roll-Over Acknowledge
+
+%%`4/20%%:Track Waybill (xst_trak)%%%
+
+Track Waybills are generated by the local Track Registrar Secretariat
+at l/track%. Track Waybills are intended as a shared reference for the
+continued coordination between two local Secretariats.
+
+xst_trak Ticket Specification:
+
+Field     Size    Type        Description
+track     32 bit  uint32_t    Track ID
+dispatch  16 bit  uint16_t    Dispatch ID
+sid       16 bit  uint16_t    Endpoint SID
+dsk       16 bit  uint16_t    Endpoint Desk
+
+
+%%`4/21%%:Track Lease Ticket%%%
+
+Track Lease tickets are submitted to the local Track Registrar
+Secretariat at l/track% in order to request a new Track Lease. The
+track lease also initializes a track Dispatch ID, Administrator desk,
+as well as the Agent SID/Desk.
+
+xst_tlea Ticket Specification:
+
+Field     Size    Type        Description
+dispatch  16 bit  uint16_t    Dispatch ID initial value
+admin.dsk 16 bit  uint16_t    Administrator Desk of Record
+agent.sid 16 bit  uint16_t    Initial Agent SID
+agent.dsk 16 bit  uint16_t    Initial Agent Desk
+
+
+%%`4/22%%:Track Admin Ticket%%%
+
+Track Administration Tickets are submitted to the local Track
+Registrar Secretariat at l/track%, by a track Administrator or Agent
+for specific administrative actions requested for the track.
+
+xst_tadm Ticket Specification:
+
+Field     Size    Type        Description
+track     16 bit  uint32_t    Track ID
+op        8 bit   uint8_t     Option
+(nul)     8 bit   padding     -----------
+union
+ reg.sid  16 bit  uint16_t    Admin/Agent SID Update
+ reg.desk 16 bit  uint16_t    Admin/Agent Desk Update
+
+ dispatch 16 bit  uint16_t    Dispatch ID Update
+ 
+ (nul)    32 bit  padding     -----------
+
+%%`4/22/1%%:Option Codes%%%
+
+Option Codes indicate the requested administrative option to be
+undertaken.
+
+Value    Code         Description
+00       TRK_TRM      Lease termination / Drop track
+01       TRK_XFR      Lease transfer (Administrator Update)
+02       TRK_RED      Track Redirect (Agent Update)
+03       TRK_DSP      Update dispatch
+
+%%`4/23%%:Track Truck Ticket%%%
+
+Track Trucks are used to encapsulate and coordinate Track-specific
+information exchange. 
+
+xst_truk Ticket Specification:
+
+Field        Size      Type        Description
+track        32 bit    uint32_t    Track ID
+dispatch     16 bit    uint16_t    Dispatch ID
+
+union
+ msg.m08     4x8 bit   uint8_t[4]  Messages
+ msg.m16     2x16 bit  uint16_t[2]
+ msg.m32     32 bit    uint32_t

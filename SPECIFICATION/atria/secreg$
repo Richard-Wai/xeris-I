@@ -1,0 +1,48 @@
+%%!xeris%atria%%$secreg%%::ATRIA% Secretariat Registrar%%%
+
+%%`0%%:Introduction%%%
+
+SECREG$ manages the registration and retrieval of Secretariat
+Registration Files for the facing OPSEC%, as well as other ATRIA%
+operators.
+
+%%`1%%:Accepted Work Orders%%%
+
+SECREG$ responds only to XERIS Standard Service Request Tickets. If
+the stub indicates a different ticket type, the request will be
+rejected with RJT/OP_F_UNACPT_ORDER.
+
+The Service Listing is as follows. See section 2 for operational
+details.
+
+SVC      CMD          Description
+0000     OPCERT       Retrieve Operational Certificate
+
+
+Unrecognized codes will be rejected with a XERIS Standard Report
+Ticket on a RJT stub. The report will indicate "OP-F-SVC_UNAVAIL".
+
+%%`2%%:Services Operational Manual%%%
+
+%%`/0%%:[SRQ]OPSERT: Retrieve SOC%%%
+
+The SRF Retrieval expects a single 16-bit parameter (p16[0]) indicating
+the Secretariat ID (SID) of interest.
+
+If the indicated Secretariat's Registration File is accessible and the
+secretariat is not in lockdown, SECREG$ will fill out the SOC which
+should be placed on (pointed to by) the case board.
+
+SECREG$[SRQ]OPSERT& will always attach a XERIS Standard Report ticket
+to the Work Order. The possible Stubs and SOSES Codes are as follows:
+
+SECREG$ will never write any data unless the retrieval is successful.
+
+Stub   SOSES Report         Description
+CPL    OP-S-REQUEST_CPL     Request was completed successfully
+DNY    OP-F-NOT_PERMITTED   Requested Secretariat is in lockdown
+UNA    OP-F-NO_SECRETARIAT  Secretariat is not registered
+RJT    OP-F-CB_CONFIG       Board configuration is not acceptable
+
+
+ 

@@ -1,0 +1,91 @@
+%%!xeris%atria%%$ctxm%%:ATRIA% Secretariat Context Management%%%
+
+%%`0%%:Introduction%%%
+
+The ATRIA% Secretariat Context Management operator (atria%ctxm$)
+manages the global working memory of the relevant secretariat as
+assigned to a local Outbound Track.
+
+In the XERIS/APEX system, a Secretariat Context refers to the state of
+shared data within that Secretariat, namely "bss" and "data"
+sections. Run-time context in the form of stacks, registers, and other
+task-specific data represents the Dispatch context.
+
+On larger systems, ctxm$ can provide critical fault-tolerance and
+recovery infrastructure by allowing saves, restores, and transfers of
+active contexts.
+
+%%`1%%:Submission Procedure%%%
+
+CTXM$ accepts only XERIS Standard Service Request Tickets, however
+its capability is extendable through the introduction of additional
+ATRIA% support operators.
+
+CTXM$ always returns a XERIS Standard Report Ticket.
+
+This specification covers only the most basic, standard operations.
+
+Codes 0000 - 00ff are reserved for base specified service, as contained
+within this specification. Implementation specific services may be
+implemented from 0100 and higher.
+
+Base Specified Service Codes:
+
+Code     Service Description
+0000     General Initialization
+0001     Single Initialization
+0002     Set-point Store
+0003     Set-point Recall
+
+An invalid service code results in a xst_rpt return of Spec/Code
+0000/5002 (OP-F-SVC_UNAVAIL).
+
+%%`2%%:Service Code Operational Specifications%%%
+
+%%`/0%%:0000 - Autonomous General Initialization%%%
+
+This service re-loads the data sections, and initializes to zero the
+entire bss section of the specified Track's associated Secretariat,
+from locally integrated storage. It then configures the active
+dispatch zone file to conform to the largest available contiguous area
+of executive memory available for dispatch execution.
+
+This mode is intended to be invoked directly from FLATLINE%OMNI$
+during node initialization.
+
+Any submissions to CTXM$ always expect the active OPCON location to be
+passed on the dispatch board.
+
+Service Request Ticket Fields:
+
+Field    Value
+rqc      0000
+p16[0]   Loader Select
+
+%%`//3%%:p16[0] - Loader Select%%%
+
+This value is implementation - specific, but indicates to ATIRA% the
+loader module for .data initialization.
+
+A value of zero shall always represent a "default" or "nominal"
+configuration. 
+
+This service will always return a XERIS Standard Report Ticket of the
+following possible configurations:
+
+Spec/Code    Human Code         Indication
+0000/0001    OP-S-OPR_OK        Operational Was Successful
+0000/5005    OP-F-WRITE_UNABLE  Unable to write
+0000/5006    OP-F-READ_UNABLE   Unable to read
+0000/5009    OP-F-NO_TRACK      Invalid Track
+0000/500f    OP-F-OPTION_UNKN   Invalid Loader Selection
+0000/500d    OP-F-DATA_CORRUPT  Source Data is corrupt
+0000/500e    OP-F-EC_UNABLE     Error correction failed
+0000/500f    OP-F-VERIFY_FAIL   Write verification failed
+0000/5004    OP-F-ACCESS_DENIED Source access denied by other operator
+
+
+
+
+
+

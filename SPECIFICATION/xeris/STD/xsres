@@ -1,0 +1,141 @@
+%%?xeris%%%
+
+%%*xsres%%:XERIS Standard Report Encoding Schema%%%
+
+%%`0%%:Introduction%%%
+
+When first initialized, it is specified that a XERIS/APEX system must
+come-up on a Umbilical Link to it's parent node, and establish this
+link as soon as possible. This is the role of the Umbilical Link
+Operator (flatline%ulo$) until such time as opsec% is initialized and
+the Telemetry, Reports, and Accounting Commissions Executive
+(opsec%trace$) commissions a separate operator.
+
+Telemetry may be passed between nodes and upwards through tiers though
+any agreed means that maintains the xst_tlm ticket specification (see
+specification xeris?xsts*4/15). 
+
+However, the ULO always transmits telemetry sequentially with 8-bit
+characters of the ASCII standard. This specification outlines this
+standard.
+
+This standard may be maintained with appropriate Operating Mode
+operators at the discretion of the implementation.
+
+%%`1%%: Principals%%%
+
+Each Telemetry report shall be transmitted as a single sequential
+unit, beginning with the relative or absolute address of the node,
+followed by all telemetry contained within the Telemetry Track,
+including the additional information stream, if any.
+
+This standard requires a synchronous, or apparently synchronous,
+transmission of 8-bit bytes ("characters") that conform to the UTF-8
+standard. This is to ensure Human and Machine legibility.
+
+All numeric values shall be coded with UTF-8 encoding, using
+HEXADECIMAL (00-FF) format, in UPPER CASE only. The most significant
+byte shall always be transmitted first.
+
+All characters that are not control characters, and are not 0-9, A-F,
+shall be ignored.
+
+It is encouraged that single Telemetry Reports be followed by a LF and
+CR for better Human accessibility. flatline%ulo$ will always do
+this. This is not a general requirement of this standard.
+
+%%`2%%:Set-up and Termination Control Sequence%%%
+
+All Telemetry Reports shall be opened with '%%', and closed with
+'/%%'. Optionally, a 16-bit Pearson Hash checksum may be appended,
+followed by a '?'. 
+
+%%`3%%:Sequence 1: Node Address Path%%%
+
+Immediately following the Set-up sequence ('%%'), the source node
+address path is expected before a '!!'. If any other control
+characters, except for '@' or '!', are encountered before '!!', the
+transmission is invalidated.
+
+The address path may be blank if the telemetry origin node itself is
+transmitting the telemetry. In this case, the beginning of the
+sequence shall be "%%!!" to indicate that the telemetry source is the
+same as the transmitting node.
+
+Each node name in the address path shall be prefixed with an 8-bit
+address type code, encoded in hexadecimal/UTF-8, followed by the
+control character '@'. If any node in the address path is missing the
+type code, the transmission is invalidated.
+
+Node names in an address path shall be terminated with the control
+character '!'. Between the '@' and '!' control characters, any string
+of UTF-8 encoded characters is permitted, except for any of the
+control characters. Any unexpected control characters will invalidate
+the transmission.
+
+%%`/1%%:Examples%%%
+
+%%(%%%
+Originating node transmission:
+%%&!0004%0000-F001/ABCDEF12/
+
+Bang-path UTF-8 nodename transmission:
+%%00@node1!00@node2!00@node3!!00A9%0000-0003&1/0000/0AC8%%
+
+IPv4 node direct address:
+%%02@192.168.1.8!!01E8%0000-A005&2/FFFFFFA6%%
+
+Mixed path:
+%%02@192.168.7.23!00@sys21!00@deepnet5!!0001%0005$02&00-0000:000A/%%
+ 
+%%)%%%
+
+%%`/2%%:Address Type Codes%%%
+
+Address Type Codes and the expected format are as follows:
+
+Code    Type           Format
+00      Node Name      XERIS Standard Node Name - any UTF-8, except ctl
+01      IP v6          2001:0DB8:AC10:FE10:0000:0000:0000:0000
+02      IP v4          192.168.1.1
+03      ETHERNET MAC   12-34-56-78-9A-BC
+04      I2C/SMBus      7F  (HEX for 7-bit address, excluds R/W bit - 7F max)
+05      CAN            7FF (Standard) / 1FFFFFFF (extended)
+06      Bluetooth      012345678ABC
+07      Telephone      14165558888
+
+08-5f   RESERVED
+
+60-ff   Implementation Specific
+
+%%`4%%:Sequence 2: Secretariat/Operator Identifier%%%
+
+Following the node address path, terminated by '!!', an exactly 16-bit
+Secretariat ID (SID) of the originating Secretariat on the originating
+Node shall be provided in HEX format (4 UTF-8 Characters). This shall
+then be terminated with a '%' control character. If any unexpected
+character is encountered, the transmission is invalidated.
+
+Following the SID, an Operator ID from that Secretariat shall be
+provided, immediately following '%'. It shall be an exactly 16-bit
+Operator ID of the originating Operator of the originating
+Secretariat, in HEX format (4 UTF-8 Characters). This shall then be
+terminated with a '$' control character. If any unexpected character
+is encountered, the transmission is invalidated.
+
+The SID is Node-specific, and the Operator is specific to the
+originating Secretariat.
+
+%%`5%%:Sequence 3: Category Code%%%
+
+Following the Secretariat and Operator Identifiers, terminated with
+'$', an exactly 8-bit Category Code shall be provided in HEX format (2
+UTF-8 Characters).
+
+Refer to the XERIS Standard Ticket Specification, xst_tlm
+(xeris?xsts*4/15) for appropriate category codes.
+
+The category shall be terminated with a '&' control character. If any
+unexpected character is encountered, the transmission is invalidated.
+
+%%`6%%:Sequence 4: Payload Category%%

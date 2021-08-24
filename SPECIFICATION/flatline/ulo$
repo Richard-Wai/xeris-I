@@ -1,0 +1,82 @@
+%%!flatline%%$ulo%%:Umbilical Link Operator%%.0%%,1%%%
+
+%%`1%%:Description%%%
+
+The Umbilical Link Operator provides limited, standardized
+communication facilities to enable initial boot configuration and
+transient event recovery, as well as serving as the initial thtu$/MAN%
+Tier Horizon Telemetry Uplink. The operator initializes and then
+releases the line before booting to SIPLEX%.
+
+%%`%%:Accepted Manifests%%%
+
+The ULO$ only accepts XERIS Standard Dispatch Order objects as per the
+Specification (xeris?xsdp*)
+
+ulo$ processes only standard Manifests of the type:
+1. SRQ         (Service Requests)
+2. STR         (String Packets)
+
+%%`%%:Service Requests%%%
+
+Accepted Service Request Codes are listed as follows:
+
+Value   Code       Arguments       Description
+00      ULO_RXS    uint8  len      Receive String
+11      ULO_TH1    uint8  val      Transmit 8 bit value as HEX string
+12      ULO_TH2    uint16 val      Transmit 16 bit value as HEX string
+14      ULO_TH4    uint32 val      Transmit 32 bit value as HEX string
+21      ULO_TD1    uint8  val      Transmit 8 bit value as DEC string
+22      ULO_TD2    uint16 val      Transmit 16 bit value as DEC string
+24      ULO_TD4    uint32 val      Transmit 32 bit value as DEC string
+
+
+%%`/1%%:Receive String Requests%%%
+
+The ULO_RXS Service Request instructs ULO$ to wait for and receive a
+string of an indicated length. ULO$ will wait indefinitely for this
+receipt to be made. Though the ULO$ should generally be used with
+great caution, this allows for some helpful and potentially very
+common node start-up synchronization.
+
+ULO$ expects a XERIS Standard Dispatch Order with a SRQ Manifest and
+SRQ XERIS Standard Ticket. The SRQ ticket is assumed to be configured
+with 8 x 8-bit parameters (p08).
+
+The first parameter is expected to be the desired string length to
+wait for. Though it should be noted that ULO$ will return regardless
+once the received string reaches the maximum size to fit in a standard
+String Packet (including a null termination).
+
+Please refer to the xeris?xsts* specification for more details on the
+limitations of the xsts_pstr Standard Packet definition.
+
+This service request will always return a XERIS Standard Dispatch
+Order with the RET (Return) Stamp, and with a String Packet
+Manifest. If the service was unsuccessful in any way, this service
+will simply return an empty string (in fact, all null). The dispatch
+will always be of the following two possible configurations:
+
+Manifest   Ticket Type    Content
+STR        xst_pstr       NULL-terminated string packet. (seq=0)
+
+%%`/2%%:Transmit Formatted Numerical String%%%
+
+These Service Requests cause the ULO$ to covert one submitted value to
+the indicated base-10 or base-16 UTF-8 encoded string representation
+(0-9 / 0-F), and then transmit that string.
+
+ULO$ ignores all except the first parameter value of the ticket.
+
+For 8-bit values, ULO$ expects a 4 x 16-bit parameter configuration
+(p16), but will ignore the most significant byte of the first
+parameter valuer.
+
+For 32-bit values, ULO$ expects a 2 x 32-bit parameter configuration
+(p32).
+
+These Service Requests will never return on fail. There is only one
+possible return type as follows:
+
+Manifest   Ticket Type    Content
+CPL        xst_rpt        0000/0002 - "Request Complete"

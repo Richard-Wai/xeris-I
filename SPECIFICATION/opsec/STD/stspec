@@ -1,0 +1,39 @@
+%%!xeris%opsec%%*stspec%%%
+
+%%:OPSEC% Structural Specification%%%
+
+%%`0%%:Role of this Specification%%%
+
+This specification outlines the internal operators of OPSEC%, both
+reachable and unreachable from cdd$.
+
+%%`1%%:Internal Operator Listing%%%
+
+Operator    Track        Description
+cdd$        0000         Central Dispatch Desk
+supr$       0001         Dispatch Supervisor
+tla$        0003         Telemetry Aggregator
+pac$        0004         Permit Assessment Commission
+sem$        0007         OPSEC% Semaphore Facility
+xfm$        0008         Executive Fleet Marshal
+exs$        0009         Executive Scheduler
+ops$        000a         Operational Scheduler
+int$        000b         Interrupt Management Division
+cfg$        000c         Configuration Manager
+plo$        000d         Procuratorate Liaison Office
+xsa$
+
+%%2%%:OPSEC Central Operational Data Structure%%%
+
+The Central Operational Data Structure maintains all globally
+accessible operational information that is used throughout OPSEC%. The
+structure is partitioned according to the responsible manager of that
+partition, which shall be a single Operator with OPSEC. Only the
+responsible manager is permitted to modify the information under its
+responsibility. Any other operator may read any of the shared data
+structures.
+
+The operational design of OPSEC% prevents interrupted writes where the
+interuptee may obtain corrupted or outdated information. Operators will
+use private semaphores on their discretion to prevent write
+corruptions during possible reentrancy due to scheduler preemption.

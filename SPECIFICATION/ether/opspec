@@ -1,0 +1,74 @@
+%%!xeris%ether%%*opspec%%%
+
+%%:ETHER% Eminent Tier Horizon Executive Relay%%%
+
+%%`0%%:Role of ETHER in the XERIS/APEX System%%%
+
+ETHER acts as an executive agent of the Executive Group. The role of
+ETHER% is to bridge the gap between the local Tier Horizon, and the
+supporting internal and trans-tier operations.
+
+In simple terms, ETHER% dispatches tickets in service of the Tier
+Horizon Dictate, often under the direction of a Supreme Directorate
+Liaison.
+
+The implementation of ETHER% is intended to be as undefined as
+possible, to afford the necessary flexibility.
+
+The basic operational intention is for ETHER% to act as a gateway for
+elevated privileges, as well as the organized execution and reporting
+of Tier Horizon Dictate directives.
+
+%%`1/0%%:0000$ Ticket Export Operator (TEX$)%%%
+
+The export operator accepts only XERIS Standard Report tickets for
+export. Upon receipt of a telemetry ticket, ETHER will re-format the
+ticket into a XERIS Standard Telemetry ticket, and export it to the
+assigned export agent.
+
+TEX$ will always return with a XERIS Standard Report ticket which will
+always be one of two possible configurations:
+
+STUB    SPEC   CODE      Human Format
+ACP     0000   0009      OP-S-ACCEPTED
+RJT     0000   5008      OP-F-UNACPT_ORDER
+
+%%`1/1%%:0001$ Configuration Operator (CFG$)%%%
+
+When invoked, the configuration operator always directly invokes
+FLATLINE%ECM$ (ETHER Configuration Manager) and provides a pointer to
+the configuration file directly to FLATLINE%ECM$. ECM$ can also
+configure ETHER$ to reject all further CFG$ requests.
+
+CFG$ is primarily intended to be invoked from FLATLINE%$.
+
+CFG$ will return a XERIS Standard Report Ticket, referencing SOSES
+Spec 0000, in one of two possible configurations:
+
+Stub      SOSES Code          Description
+CPL       OP-S-REQUEST_CPL    Request relayed to ETHER$CFG$
+UNA       OP-S-OPR_UNAVAIL    Operator is disabled
+
+%%`2%%: ETHER Configuration File%%%
+
+The ether configuration file a few simple configuration details as
+follows:
+
+Element     Type      Description
+sid         uint16    Secretariat ID of line operator
+opr         uint16    Operator ID of line operator
+cfg         uint8     Config Flags
+
+Config flags:
+Bit    Code     Default   Description (when set)
+0      CF_TLM   SET       ETHER% only accepts Telemetry Tickets
+1      CF_CFG   SET       ETHER%CFG$ accessible
+2      CF_ENA   SET       ETHER%EXP$ service enabled
+3      CF_HEX   CLEAR     Only applies if line operator is FLATLINE%ULO$
+                          non-telemetry reports are passed to ULO$ to be
+                          encoded in a human-readable HEX stream.
+
+
+
+
+

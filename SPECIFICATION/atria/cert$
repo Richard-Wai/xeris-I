@@ -1,0 +1,36 @@
+%%!xeris%atria%%$cert%%:ATRIA% Track origin certification service%%%
+
+%%`0%%:Introduction%%%
+
+The ATRIA% Track Origin Certification Service module (atria%cert$)
+provides origin track verification to OPSEC%.
+
+CERT$ accepts a ATRIA Desk Card (adc) non-standard ticket which points
+to any instruction address within a secretariat, and carries the
+expected origin track value.
+
+CERT$ verifies if the instruction address is within the instruction
+space of the secretariat associated with the indicated track.
+
+CERT$ always returns a XERIS Standard Report Ticket (xst_rpt), with
+only three possible Spec/Code pairs.
+
+
+%%`1%%:Submission Procedure%%%
+
+The ATRIA Dispatch Card non-standard ticket (nst_atria_adc) submitted to CERT$
+should be filled-out as follows:
+
+Field                Value
+trk                  Suspected Origin Track Number
+xsdo (*ldd) (xsdo)   Instruction address of interest
+
+CERT$ will then return a XERIS Standard Report Ticket of one of the
+following three configurations:
+
+Spec/Code    Human Code       Indication
+0000/0008    OP-S-TEST_PASS   Address is certified to be within track
+0000/500b    OP-F-TEST_FAIL   Address is not within track
+0000/5009    OP-F-NO_TRACK    Invalid track
+
+

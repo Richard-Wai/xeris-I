@@ -1,0 +1,112 @@
+%%!flatline%%$omni%%%
+
+%%:Ordinal Managed Node Initialization%%%
+
+%%`0%%:Description%%%
+
+OMNI$ is a modular interface for the sequenced execution of
+implementation-specific initialization modules which are intended to
+have the primary functions of:
+
+1. Selecting the appropriate initialization module
+2. Initializing appropriate node context
+3. Providing initial dispatch requests to for FLATLINE outbound
+4. Providing fall-back during unexpected failures
+
+OMNI$ is the target operator of FLATLINE%, and is called from SYSBOOT$
+as soon as ULO$ and ULIF$ are initialized. An exit from OMNI$ in any
+circumstance causes FLATLINE.
+
+OMNI$ follows a very simple rule-set and interface. OMNI$ itself does
+not accept any inbound dispatches.
+
+Internally, OMNI$ is logically partitioned into "levels". Each level
+will point to a single procedure module ("program") as registered by
+ATRIA%. The maximum level supported by OMNI$ is configurable, but is
+structurally limited to 1,023 levels.
+
+Upon entry, OMNI$ will always, without exception, execute Level
+0. OMNI$ will always pass a non-standard "OMNI Authorization" ticket
+(flatline_oa) to the registered program, containing the current Level,
+as well as a function pointer to the FLATLINE% Dispatch Desk. OMNI$
+expects a return of a XERIS Standard Report Ticket (xst_rpt). If the
+Note parameter of the received Report ticket is "STA", OMNI$ will set
+Level according to an assumed unsigned 16-bit integer read from
+adi.adi16[0].
+
+OMNI$ will then pass the resulting RPT code as a Telemetry ticket to
+FLATLINE%ULO$. Additional information/parameters will be ignored. If
+the next selected Level is not explicitly requested, OMNI$ will
+increment the Level by 1. If the Level is 1023, OMNI$ will exit,
+causing a FLATLINE inception event.
+
+%%`1%%:Initial Entry%%%
+
+OMNI$ shall be called directly from SYSBOOT$, and is not accessible
+from the FLATLINE% Dispatch Desk.
+
+SYSBOOT$ shall pass a Dispatch to OMNI$ with only the Non-standard
+Ticket "ATRIA Strap" (atria_strap). ATRIA Strap provides pointers to
+the OMNI Program Registry (atria_strap.opr) and the Secretariat
+Registry (atria_strap.secreg). Refer to the relevent ATIRA%
+specification for details of the ATRIA Strap non-standard
+Ticket. These two basic elements allow for XERIS Standard OMNI Simple
+Start twin phase package (oss/2). Please refer to the relevant oss/2
+section within this specification for more details. 
+
+OMNI$ will be initialized to Level 0, and execute the registered
+program as provided by ATRIA Strap.
+
+%%`2%%:OMNI as Custodian of the Tier Horizon Dictate%%%
+
+The very conceptual underpinning of the XERIS/APEX System requires
+that any Secretariat must be activated in response to an inbound
+dispatch. Therefore, at the very beginning, there must be an assumed
+active dispatch. According to the XERIS/APEX design, this first active
+dispatch has no origin, and represents a point of time for which there
+is no local past. When OMNI$ issues its first outbound dispatch via
+OPSEC%, it appears to OPSEC% to originate from an existing dispatch from
+which active dispatches are decedent from. That primordial dispatch is
+known as the Tier Horizon Dictate (THD). The dispatch of the THD is
+managed by FLATLINE%OMNI$, but is ultimately sourced from outside of the
+local node or any neighboring nodes of its tier, and therefore
+conceptually originates from beyond the "Tier Horizon".
+
+%%`3%%:OMNI Simple Start, twin phase (oss/2)%%%
+
+The OMNI Simple Start, twin phase (oss/2) is the base guaranteed OMNI$
+implementation as included by the core XERIS/APEX Specified System. It
+may be conceptually identified as the "original" OMNI$.
+
+Generally it can be expected that the oss/2 package has
+hardware/implementation-specific aspects, but the general purpose of
+oss/2, and the depth of the specified behavior is covered within this
+specification.
+
+As the name implies, oss/2 consists of a basic two-Level OMNI$
+configuration, which therefore constitutes two Program modules. The
+two program modules are described below.
+
+%%`/0%%:Level 0 ("Phase 1") - Clean Context Initialization (ccxi)%%%
+
+The Level 0 Program refers to the Secretariat Registry to load the
+initial "data" sections for all registered secretariats. It can also
+be configured to zero-out all .bss sections.
+
+Importantly, this phase initializes OPSEC%. Following this phase,
+OPSEC% can be considered activated, but the OMNI$ is still behind the
+Tier Horizon until phase 2.
+
+%%`/1%%:Level 1 ("Phase 2") - Primordial Executive (pex)%%%
+
+The Level 1 Program then executes, sequentially, a predetermined list
+of dispatch orders. The last of which should dispatch to a general
+monitoring process which will not return unless the system is
+collapsing.
+
+The idea of Level 1 is to "bring up" the node as intended, including
+initializing appropriate drivers and systems as may be necessary
+before launching core processes.
+
+Level 1 is the only Tier Horizon Shock in oss/2, and is always
+executed out of FLATLINE.

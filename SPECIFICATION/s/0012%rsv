@@ -1,0 +1,38 @@
+%%!s/0010%rsv%%:Case File Reserve%%%
+
+%%`0%%:Synopsis%%%
+
+The Case File Reserve Secretariat allows efficient and reliable storage
+of the work-order section of the active case file to a referenced
+alternate file. The board is not saved, and is not modified during
+write-out to the reference file.
+
+The Case File Reserve Secretariat is Operator agnostic, and provides a
+simple single interface.
+
+This specification describes the use of and operation of s/rsv%.
+
+%%`1%%:Operational Procedure%%%
+
+It should be noted that under no circumstances whatsoever does r/rsv%
+modify the work order of the Active Case File.
+
+The Case File Reserve Secretariat expects a valid XERIS Standard Case
+File pointer to be passed in the active Case File Board Pointer, with
+the Board Size set appropriately.
+
+Assuming a correct submission, the Case File Reserve Secretariat will
+transfer the complete Work Order as-is to the Alternate Case File
+posted to the Active Case Board. s/rsv% will not modify the Alternate
+Case Board in the process. In the case of a correct submission, s/rsv%
+will not make any modifications to the Active Case File
+
+%%`2%%:Possible Failure Modes%%%
+
+If the operation is not successful, impossible, or incorrect for any
+reason, s/rsv% will clear the Active Case Board, posting a NULL
+pointer, and setting the size to NIL.
+
+The most likely cause of an unsuccessful operation is an incorrect
+submission. An incorrect submission includes 1) an invalid pointer
+(out of bounds or unauthorized), or 2) an incorrect size indication.

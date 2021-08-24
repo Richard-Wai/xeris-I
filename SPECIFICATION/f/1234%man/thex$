@@ -1,0 +1,82 @@
+%%!man%%$thex%%%
+
+%%:Tier Horizon Export%%%
+
+%%`0%%:Description%%%
+
+The Tier Horizon Export works as the downstream commissioned processor
+(DCP) for l/horizon%, processing the Active Case File into, a
+standardized human-readable plain-text (UTF-8) encoding.
+
+The standard encoding format is also specified by this specification.
+
+%%`1%%:Tier Horizon Interface Encoding Specification%%%
+
+Transmitted data shall be encoded numerically in Hexadecimal using
+UTF-8, capital letters A-F, and digits 0-9. Nibbles shall be
+transmitted serially, and in "big-endian" order.
+
+The space (' ') character shall be ignored and serves no functional
+significance, however it shall be inserted during the encoding phase
+to separate contiguous blocks of four bytes (4 nibbles/digits).
+
+Sections of the case file shall be delineated at both start and end by
+appropriate symbols as defined in this specification.
+
+A Case File transmission encoding shall itself be delineated by an
+appropriate signature at the beginning and end, and shall be
+transmitted contiguously.
+
+%%`1/1%%:Case File Transmission Begin Signature%%%
+
+A new Case File Transmission shall begin with the following signature:
+
+"!HORIZON/"
+
+%%`1/2%%:Board Delineation%%%
+
+Case Board Pointer Begin: "*"
+Case Board Size Begin: "+"
+Section Termination: "/"
+
+Board pointer shall always show all digits of the node pointer size to
+communicate the pointer width. Board size has no such constraint.
+
+%%`1/3%%:Work Order Delineation%%%
+
+Work Order Desk Termination: "$"
+Work Order Stub Termination: "["
+Section Termination        : "]"
+
+%%`1/4%%:Stamp Delineation%%%
+
+SID Termination                      : "%"
+Upstream Desk Termination            : "$"
+Downstream Security level Termination: "?"
+
+%%`1/5%%:Encoding Example%%%
+
+In this encoding example, the source node has a pointer width of 16
+bits, and is returning a XERIS Standard Report Ticket to the tier
+horizon via a call to xeris ( 0 ). The report is SOSES code
+OP-S-REQUEST_CPL, with a CPL stub, a condition NRM and, note NON, and
+random adi on the ticket. The board pointer is null with a random
+board size.
+
+Originating Secretariat is %6012, and f/man%tci$ (1234%8000$) is the
+Telemetry Commissioner.
+
+The output stream from thex$ will be as follows:
+
+"!HORIZON*0000+50/8000$[0000 0002 0000 A2F8 10AC]6012%0$1000?"
+
+%%`1%%:Submission Procedure%%%
+
+The thex$ desk is ticket agnostic, and will pack any ticket. 
+
+thex$ will not modify the Active Case File in any way.
+
+
+
+
+

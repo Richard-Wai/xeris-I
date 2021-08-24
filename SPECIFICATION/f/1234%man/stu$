@@ -1,0 +1,49 @@
+%%!man%%$stu%%%
+
+%%:SOSES Translation Unit Desk%%%
+
+%%`0%%:Description%%%
+
+The MAN% SOSES Translation Unit produces the specified Human
+Translation as specified in the SOSES specification for the relevant
+SPEC/CODE pair.
+
+%%`1%%:Submission Procedure%%%
+
+The stu$ desk only accepts XERIS Standard Report or Telemetry
+Tickets. Tickets of other types are simply ignored.
+
+If no valid spec/code translation entry is available, stu$ will encode
+the spec/code pair and adi/datagram as per the XSRES (xeris?xsres*)
+specification. In case of report tickets, the indicated source SID is
+extracted from the Case File Stamp. 
+
+stu$ expects the Case Board to be configured as a buffer with a
+minimum size of 83 octets (uint8). If the case board is ever found
+to be insufficient for the output string, stu will write a null
+character at location pointed to by the case board pointer.
+
+All human-readable exports from man% are always encoded in UTF-8.
+
+stu$ will not modify the Active Case File in any way, except for the
+Case Board as described above.
+
+%%`1%%:Report/Ticket Encoding Specification%%%
+
+In the following string, bracketed lower-case letters are to be
+replaced with the values described in the following table:
+
+Item    Description      Format
+(a)     TLM Reported SID 16-bit hex (zero-extended)
+(b)     SOSES Spec       16-bit hex (zero-extended)
+(c)     SOSES Code       16-bit hex (zero-extended)
+(d)     DGM Dump         32-bit hex (zero-extended)
+
+
+Output format:
+"&(a)%(b)-(c)/(d)/"
+
+
+
+
+

@@ -1,0 +1,205 @@
+%%?xeris%%*xsdp%%:XERIS Standard Dispatch Procedure%%.0%%,1%%%
+
+%%`1%%:Introduction%%%
+
+Tickets are the philosophical foundation of the XERIS/APEX system. A
+key underpinning of the XERIS/APEX operational specification,
+specifically concerning the role of OPSEC Central Dispatch Desk
+(xeris!opsec%cdd$), is that all tickets passed between individual
+Secretariats must be only via the local opsec%.
+
+All Tickets destined for other Secretariats must be attached to a
+standardized "Stub", in order to form a Dispatch Order. A Dispatch
+Order is an absolutely specified and standardized quantized data
+structure of a fixed size. opsec%cdd$ and all local ldd$'s of all
+Secretariats must receive and return only XERIS/APEX Standard Dispatch
+Orders, as set-out in this specification.
+
+The Outbound and Inbound Dispatch procedures, as well as the specified
+Dispatch Order form and Standard Dispatch Tickets are all specified
+within this XERIS STANDARDS Specification (xeris?xsdp*). The Standard
+Dispatch Procedure is a critical component the XERIS/APEX system
+specification, and as such, forward and backward compatibility is
+compulsory in all implementations, past and future. 
+
+This specification, besides specifying the Standard Dispatch Order, also
+provides a standardized ticket group which provision special services
+such as secure consignment, and standardized packet streaming. Beyond
+the standardized ticket forms, there is practically unlimited custom
+ticket forms that can be dispatched for non-standard
+implementations. It is, however, encouraged that standard tickets be
+used whenever possible.
+
+%%`%%:Ticket Philosophy Overview%%%
+
+Tickets should be considered the smallest operational data unit in the
+XERIS/APEX system. Though the specification does not require or
+enforce the use of tickets internally within a Secretariat, doing so
+is highly encouraged. The XERIS/APEX specification provides a full
+specification of ticket form, size, and procedure. This specification
+must be followed during any and all Dispatch Orders via the Central
+Dispatch Desk.
+
+Tickets themselves shall be considered tangible objects. Tickets shall
+always be transmitted completely. Tickets may be modified, copied,
+returned, re-dispatched, or discarded at the discretion of the
+recipient. Dispatch Orders are only required for dispatch tickets that
+leave a given Secretariat. Under no circumstance is it permitable for
+a ticket to be pointed to.
+
+%%`%%:XERIS/APEX Operational Philosophy Overview%%%
+
+Unlike a more traditional multi-tasking system, XERIS/APEX puts the
+emphasis on finite requests ("Dispatches"), rather than
+"processes". OPSEC% schedules and switches processor activity among
+active dispatches. Rather than allotting time to specific processes,
+XERIS/APEX schedules processing resources to dispatches. The dispatch
+itself may pass through various "Secretariats" (distinct applications)
+on the route towards completion of the request, but will remain as one
+Dispatch. Furthering this philosophy, priorities are also attributed
+to dispatches, rather than to the process themselves, allowing all
+processes involved in a specific dispatch to inherit a common priority
+or deadline that is determined by the request at hand, allowing a more
+dynamic priority system that can respond to diverse stimuli.
+
+%%`%%:Dispatch Proceedure%%%
+
+%%`/1%%:Overview%%%
+
+All inter-secretarial communication of any kind shall always and only
+be carried-out through a standard Dispatch Order, containing the
+ticket to be dispatched, attached to a standard dispatch "Stub", as
+described in this specification. Export of any data directly to other
+Secretariats or Operators within, or to any data external to the
+Secretariat's jurisdiction is in contravention of the XERIS/APEX
+specification.
+
+
+%%`/%%:Standard Dispatch Order Structure%%%
+
+The Standard Dispatch is divided into two logical components. The body
+of the Dispatch Order is the Ticket, to be delivered to the
+recipient. The Ticket is packaged within a container structure known
+as the "Stub". The Stub carries the Dispatch meta-data. The Dispatch
+Order is logically organized as follows:
+
+1. Track           (16 bits)
+3. Stamp           (8 bits)
+3. Manifest        (8 bits)
+-- Stub Separation --
+3. Ticket          (xst_nul = 80 bits)
+
+%%`//1%%:Dispatch Stub%%%
+
+The Stub, to which the Ticket (be it standard or non-standard) is
+attached, contains three universally specified components. The Stub
+may be modified as the Ticket is dispatched, but the Ticket will not
+be modified.
+
+%%`///1%%:Track%%%
+
+Tracks represent the next hop in a dispatch route. Every Secretariat
+reachable by OPSEC% (and it's jurisdiction) is assigned to a single
+Track. Track assignment is managed by ATRIA%. No two Secretariats may
+share a track. 
+
+The Track field of a dispatch order refers either to the outbound
+track (SUBMIT), or the inbound track (RECEIVE or RETURN).
+
+%%`///%%:Spur%%%
+
+Spurs represent tracks internal to the destination secretariat, and
+are generally connected to distinct Operators within that secretariat,
+but this is under full authority of the Secretariat to determine.
+
+%%`///%%:Stamp%%%
+
+Stamps are applied to any Stub when it is created and attached to a
+Ticket. This means that the Originating Operator applies a stamp before
+submitting a Dispatch Order to OPSEC%. When OPSEC% has processed the
+Dispatch Request, it generates a new stub and Stamps it before
+forwarding it to the Receiving Secretariat. When the Receiving
+Secretariat files a Return, it then attaches a new stub with the
+relevant Stamp applied before returning the completed Dispatch Order to
+it's Local Dispatch Desk
+
+The Stamp serves numerous purposes, but generally identifies
+track-level processing requirements for the associated manifest.
+
+Standard Stamps are as follows:
+-- Bi-directional --
+00. DSP  (Dispatch)               - Normal dispatch
+01. RET  (Return)                 - Terminal return
+02. EXC  (Exception Raised)       - Exception Raised
+-- Outbound --
+04. ISU  (Issue)                  - Issued dispatch
+05. CAC  (Consignment Accept)     - Accept Consignment Delivery
+06. CFD  (Consignment Forward)    - Forward Consignment
+-- Inbound --
+0f. SYS  (System Intervention)    - Intervention Notice from OPSEC%
+
+
+
+1x-9x - Permits
+1x. PR1
+2x. PR2
+3x. PR3
+4x. PR4
+5x. PR5
+6x. PR6
+7x. PR7
+8x. PR8
+9x. PR9
+
+a0-af - Priority Permits
+
+
+b0-bf - Accounting Stamps (OPSEC Internal)
+
+c0-cf - Inter-operations Stamps
+
+d0-ff - Undefined - Can be used for implementation-internal procedures
+
+%%`///%%:Manifest%%%
+
+The Manifest indicates the ticket type. Types 0 - 3f are reserved for
+XERIS/APEX Standardized Ticket Exchange. 40 - ff are undefined and can
+be implementation specific. Where the manifest type is not recognized,
+the ticket type shall be assumed to be a XERIS Standard Ticket type
+xst_nst as per the specification (xeris?xsts*).
+
+
+Value Code         Description                      XSTS Ticket Spec
+
+[Standard Tickets (00-0f)]
+00    SRQ          Service Request                  xst_srq
+01    MSG          Standard Message                 xst_msg
+02    CNS          Consignment Slip                 xst_cns 
+03    SIG          Standard Signal                  xst_sig
+04    EXN          Exception Notice                 xst_exn
+
+[Report Tickets (10-1f)]
+10    RPT          Standard Report                  xst_rpt
+11    CPL          Completion Report                xst_rpt
+12    PAR          Partial Completion Report        xst_rpt
+13    UNA          Unable to complete               xst_rpt
+14    APR          Request Approved                 xst_rpt
+15    DNY          Request Denied                   xst_rpt
+16    ACP          Dispatch Accepted                xst_rpt
+17    RJT          Dispatch Rejected                xst_rpt
+18    TLM          Telemetry Report                 xst_tlm
+
+1f    SYS          System Intervention              xst_rpt
+
+[Packet Tickets (20-2f)]
+20    CTL          Control Packet                   xst_pctl
+21    STR          String Packet (608)              xst_pstr
+22    808          8 x 8-bit packet                 xst_p808
+23    416          4 x 16-bit packet                xst_416
+24    232          2 x 32-bit packet                xst_p232
+25    164          1 x 64-bit packet                xst_p164
+
+[OPSEC Intercepts (30-3f)]
+30    SUP          Supervisor Request Application   xst_srq
+31    PPA          Priority Permit Application      xst_ppa
+32    DPA          Deadline Permit Application      xst_dpa

@@ -1,0 +1,68 @@
+%%!i/scr/4000%bic%%:Block Interface Channel Registrar%%%
+
+%%`0%%:Block Interface Channel Qualification Standard%%%
+
+Block Interfaces are very simple arbitrary-length block infrastructure
+service providers (drivers).
+
+Block Interfaces that wish to be registered with one of the Block
+Interface Channel Standard Class Registrar (i/scr/bic%) must provide
+the minimum interface requirements as specified in this Standard.
+
+%%`0/1%%: Service Desk Arrangement%%%
+
+Desk    HRT        Description
+0000    com$       Commissioner Desk
+0001    out$       Export Desk
+0002    inp$       Import Desk
+
+%%`0/2%%: Commissioner Desk Specified Behavior%%%
+
+The Commissioner Desk (0000$ctl) shall always respond to the following
+Registration Card requests, with XERIS Standard Message Tickets, in
+the prescribed format as described in this standard.
+
+SRQ       Card                             Parameter
+0010      Commissioner Registration Card   None
+0011      Channel Clients Card             p16[0] - channel
+0012      Affinity Registration Card       p16[0] - channel
+
+
+The Control Desk shall always respond to this service request
+with a XERIS Standard Message Ticket of the following format:
+
+%%`0/2/0: Commissioner Registration Card%%%
+
+Ticket Field       Content
+ref                Indicated Standard Class Registrar SID
+
+msg.a32[0]         Commissioner Track (zero if not commissioned)
+msg.a32[1]         Available Channels
+
+%%`0/2/1: Channel Clients Card%%%
+
+Ticket Field       Content
+ref                Channel Number
+
+msg.a08[0]         Export Client Capacity
+msg.a08[1]         Active Export Clients
+
+msg.a08[2]         Import Client Capacity
+msg.a08[3]         Active Import Clients
+
+%%`0/2/2: Affinity Registration Card%%%
+
+ref                Channel Number
+
+msg.a16[0]         Exclusive Client SID
+msg.a16[1]         Preferred Client SID
+
+
+
+
+
+
+
+   
+
+ 

@@ -1,0 +1,44 @@
+%%!man%%$ttu%%%
+
+%%:Telemetry Translation Unit Desk%%%
+
+%%`0%%:Description%%%
+
+The MAN% Telemetry Translation Unit produces the specified Telemetry
+Human Translation as specified in the SOSES specification for the
+relevant SPEC/CODE pair.
+
+%%`1%%:Submission Procedure%%%
+
+The ttu$ desk only accepts XERIS Standard Telemetry Tickets. Tickets
+of other types are simply ignored.
+
+ttu$ will first pass the received telemetry to an internal
+specification look-up module, which will attempt to reconcile and
+process the Human Format as described in the code specification. If no
+code is found, ttu$ will instead pass the telemetry to the
+Human-Readable Encoding module to generate a generic encoded telemetry
+string.
+
+ttu$ expects the Case Board to be configured as a buffer with a
+minimum size of 81 characters (uint8). ttu$ will write the result of
+the translation directly to the buffer. In the case that there is no
+code available, ttu$ will pass the Case File directly to stu$.
+
+All human-readable exports from man% are always encoded in raw UTF-8.
+
+%%`2%%:Possible Returns%%%
+
+ttu$ will always return a XERIS Standard Report Ticket with the
+following possible outcomes:
+
+Stub    SOSES Code          Description
+CPL     OP-S-REQUEST_CPL    Request was completed as filed
+PAR     OP-S-REQUEST_CPL    Request was processed by stu$
+RJT     OP-F-CB_CONFIG      Case Board configuration unacceptable
+
+
+
+
+
+

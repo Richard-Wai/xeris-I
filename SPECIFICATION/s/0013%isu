@@ -1,0 +1,30 @@
+%%!s/0011%isu%%:Case File Issue%%%
+
+%%`0%%:Synopsis%%%
+
+The Case File Issue Secretariat allows efficient and reliable
+filling-out of the Active Case File from a referenced alternate
+file. In this operation, unlike the similar s/rsv%, also copies out
+the Case Board in it's entirety. s/isu% will copy out the complete
+alternate Case File to the Active Case File in it's absolute entirety.
+
+The Case File Issue Secretariat is Operator agnostic, and provides a
+simple single interface.
+
+This specification describes the use of and operation of s/isu%.
+
+%%`1%%:Operational Procedure%%%
+
+The Case File Issue Secretariat expects a valid XERIS Standard Case
+File pointer to be passed in the active Case File Board Pointer, with
+the Board Size set appropriately.
+
+Assuming a correct submission, the Case File Issue Secretariat will
+copy-out the entire alternate Case File, including the board
+configuration, to the Active Case File.
+
+%%`2%%:Possible Failure Modes%%%
+
+If the operation is not successful, impossible, or incorrect for any
+reason, s/isu% will clear the Active Case Board, posting a NULL
+pointer, and setting the size to NIL. 

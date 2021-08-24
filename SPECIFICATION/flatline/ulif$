@@ -1,0 +1,129 @@
+%%!flatline%%$ulif%%Umbilical Link Interface%%%
+
+%%`1%%:Description%%%
+
+The Umbilical Link Interface is a specified universal interface for
+trunked or single device-specific serial link interface drivers for
+early-stage node inception monitoring and control from the node
+parent.
+
+The ULIF% supports the Simple Line Interface Specification (xeris?slis)
+and thus responds to only four operations: Initialize interface,
+Transmit String, Receive String, and Release Interface. 
+
+The ULIF should be as simple as possible to serve the basic required
+functions. As per the general FLATLINE% operational specification,
+only stack space may be used. The system will be effectively halted
+during character reads before OPSEC% is operational, if no input
+character is available. For these reasons, the ULIF$ shall only be
+accessed by FLATLINE%ULO$.
+
+ULIF$ is not for chit-chat.
+
+%%`2%%:Accepted Manifests%%%
+
+ULIF$ only accepts Service Request tickets (SRQ Manifests).
+
+%%`%%:Service Requests%%%
+
+Accepted Service Request Codes are listed as follows:
+
+Value   Code       Description
+0000    ULIF_TXS   Transmit string
+0001    ULIF_RXS   Receive string
+0002    ULIF_INI   Initialize Driver
+0003    ULIF_RLS   Release Driver
+
+%%`2/0%%:ULIF-TXS - Transmit String%%%
+
+A null-terminated string shall be placed in a buffer attached to the
+Case Board, and with the Case Board Size set to the maximum size of
+the buffer, or the desired string transmission length. The
+transmission will end at either the first NUL character encountered,
+or the extent of the buffer, whichever comes first.
+
+A hard limit exists of 0xfff bytes. ULIF$ will not transmit more than
+this amount in any circumstance.
+
+ULIF$ will always return a XERIS Standard Report ticket, which will be
+one of three possible results:
+
+Stub   Spec/Code   SOSES             Description
+CPL    0000/0001   OP-S-OPR_OK       Transmission complete
+RJT    0000/5012   OP-F-CB_CONFIG    Case Board config Unacceptable
+UNA    0000/5005   OP-F-WRITE_UNABLE Transmission failed
+
+For successful transmissions, ULIF$ will confirm the number of
+transmitted characters by returning the number in the adi16[0] field
+of the report ticket.
+
+%%`2/1%%:ULIF-RXS - Transmit String%%%
+
+A buffer shall be provided, attached to the Case Board, and with the
+Case Board Size set to the maximum size of the buffer, or the intended
+number of characters to be received. ULIF$ will continue to wait for
+character receipt until it reaches the provided Case Board Size in
+characters.
+
+A practical limit of 80 characters is implemented. Receive requests of
+greater than 80 characters will result in a return after 80 characters
+are received.
+
+ULIF$ will always return a XERIS Standard Report ticket, which will be
+one of three possible results:
+
+Stub   Spec/Code   SOSES             Description
+CPL    0000/0001   OP-S-OPR_OK       Receipt complete
+RJT    0000/5012   OP-F-CB_CONFIG    Case Board Config Unacceptable
+UNA    0000/5006   OP-F-READ_UNABLE  Transmission failed
+
+For successful transmissions, ULIF$ will confirm the number of
+transmitted characters by returning the number in the adi16[0] feild
+of the report ticket.
+
+%%`2/2%%:ULIF_INI - Initialize Driver%%%
+
+The Initialized Interface Request is intended to be called from
+FLATLINE%SYSBOOT$ initially. The ULIF_INI Service Request will
+initialize all physical links included in the node-specific ULIF$
+package.
+
+The Request will always return with a Report Ticket, with one of the
+three following possible returns:
+
+Stub    Spec/Code Pair   SOSES             ADI (adi8)
+CPL     0000/1009        OP-I-INIT_OK      TX + RX
+UNA     0000/5000        OP-F-INIT_FATAL   TX + RX
+PAR     0000/0004        OP-S-WRITE_ONLY   TX + RX (LSB)
+
+
+%%`2/3/0%%:CPL - Initialization Complete%%%
+
+CPL indicates ULIF$ has initialized at least one TX and at least one
+RX line. CPL indicates a "normal" initialization of a bi-directional
+Umbilical Link.
+
+%%`2/3/1%%:UNA - Unable to Initialize%%%
+
+UNA indicates a Fatal Error, where no TX lines available. RX lines may
+still be available.
+
+%%`2/3/2%%:PAR - Partial Initialization%%%
+
+PAR indicates that a TX-only connection has been established.
+
+%%`2/3%%:ULIF_REL - Release Driver%%%
+
+The Release Driver never fails. This service request always returns a
+XERIS Standard Report ticket of the following configuration:
+
+Stub    Spec/Code Pair   SOSES             ADI
+CPL     0000/0002        OP-S-REQUEST_CPL  None
+
+%%`4%%:Unrecognized Service Request%%%
+
+An invalid Service Requests code will always result in a XERIS
+Standard Report ticket with the following configuration:
+
+Stub    Spec/Code Pair   SOSES             ADI
+RJT     0000/5002        OP-F-SVC_UNAVAIL  None

@@ -1,0 +1,38 @@
+%%!f/1234%man%%:Human Relations Secretariat%%%
+
+%%`0%%:Operational Summary%%%
+
+The Human Relations Secretariat provides a large number of diverse
+services to support human interaction with the XERIS/APEX system. The
+primary role of the Human Relations Secretariat is to provide human
+translation and reference services for the navigation of the various
+index-based XERIS/APEX features, such as Secretariats, Desks, and
+SOSES/telemetry code sets.
+
+Additionally, MAN% provides basic support services for enabling human
+interaction, such as human-readable encoding and decoding services.
+
+MAN% is not intended for direct human interaction, and rather provides
+a suite of services to enable other human-focused user packages. This
+modular approach allows MAN% to be implemented in a distributed or
+Tier-span configurations, or simply as part of externally interfaced
+temporary maintenance node devices.
+
+%%`1%%:Desk Index%%%
+
+Desk No.  HRT            Description
+0000      f/man%hrt$     Human Reference Tree Registrar
+0001      f/man%stu$     SOSES Translation Unit
+0002      f/man%ttu$     Telemetry Translation Unit
+0003      f/man%thex$    Tier Horizon Export
+0004      f/man%thim$    Tier Horizon Import
+0005      f/man%tty$     Terminal Session Desk
+0006      f/man%login$   Operator Authorization Module
+0007      f/man%opr$     Operator Interface Module
+0008      f/man%itoa$    Human-readable Integer Encoding
+0009      f/man%atoi$    Human-readable Integer Decoding
+
+8000      f/man%telcom$  Telemetry Commissioner
+
+
+

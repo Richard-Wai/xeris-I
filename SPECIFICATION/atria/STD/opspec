@@ -1,0 +1,24 @@
+%%!xeris%atria%%*opspec%%:ATRIA Operational Specification%%%
+
+%%`1%%:Introduction%%%
+
+The Autonomous Terminal Registrar and Integration Authority (ATRIA%)
+is one of the four core secretariats in the XERIS/APEX system. It's
+role is to managed all outbound Tracks available to its associated
+OPSEC%
+
+ATRIA% provides local Secretariat registration integration for the local
+node, and coordinates with other Tier Authorities.
+
+For all local Secretariats, ATRIA% maintains a Secretariat
+Registration File which includes all initialization information, as
+well as providing return certification services.
+
+%%`2%%:Inbound Tracks and Operator Listing%%%
+
+Track      Operator        Description
+0000       secreg$         Secretariat Registrar
+0001       ctxm$           Secretariat Context Management
+0002       emrg$           Emergency Lockdown Service
+
+

@@ -1,0 +1,129 @@
+%%!xeris%opsec%%$TRAC%%%
+
+%%:OPSEC% Transaction Controller%%%
+
+%%`0%%:Executive Summary%%%
+
+The Transaction Controller provides critical section and transactional
+signal manipulation services to all Dispatches under the juridiction
+of the local OPSEC%.
+
+TRAC works exclusively with standard Signal objects, and provides two
+basic services:
+
+1. Signal Control
+2. Transaction Control
+
+All submission to OPSEC%TRAC$ should be as follows:
+
+The Case File Board pointer shall point to the selected Signal.
+
+The Case File Work Order shall carry a XERIS Standard Service Request
+ticket carrying the relevant information as described later.
+
+TRAC$ always returns a XERIS Standard Report ticket.
+
+%%`1%%:Signal Control%%%
+
+Signal control provides guaranteed atomic signal operations to all
+Operators under the jurisdiction of OPSEC%. There are four basic
+signaling services available:
+
+SVC   Code Name  Colloquial Name   Description
+10    SIG_ENT    Enter Signal      Increment signal
+11    SIG_EXI    Exit Signal       Decrement signal
+12    SIG_WCH    Watch Signal      Get signal state
+13    SIG_MAN    Manual Signal     Set signal to specific value
+
+If the Signal object reference is not valid, the Service Request will
+fail. TRAC$ will return a XERIS Standard Report Ticket with a REJECT
+stub and the SOSES code OP-F-CB_CONFIG.
+
+For all other operations, TRAC$ will always return a XERIS Standard
+Ticket with a COMPLETE stub, and the SOSES code of OP-S-REQUEST_CPL.
+
+TRAC$ will always place the value of the signal *prior* the operation
+in the additional information field of the ticker, with a
+configuration properly indicated in the NOTE field of the ticket.
+
+%%`1/0%%:SIG_ENT: Enter Signal%%%
+
+The Enter Signal service will atomically increment a signal, and then
+return the value of the signal *prior* to the increment in the
+additional information field.
+
+The signal is always incremented by exactly one.
+
+%%`1/1%%:SIG_EXI: Exit Signal%%%
+
+The Exit Signal service will atomically decrement a signal, and then
+return the value of the signal *prior* to the decrement in the
+additional information field.
+
+The signal is always incremented by exactly one.
+
+%%`1/2%%:SIG_WCH: Watch Signal%%%
+
+The Watch Signal service will return the value of the signal, but will
+not modify it in any way.
+
+%%`1/3%%:SIG_MAN: Manual Signal%%%
+
+The Manual Signal service will set the signal to the value provided in
+the p16[0] field of the parameter section of the Service Request
+ticket.
+
+The value of the signal *prior* to the updated value will be returned
+in the additional information field.
+
+
+%%`1%%:Transaction Control%%%
+
+Transactions represent a sequential procedure that must be executed
+in entirly without chance of re-entry. Operators can post
+transactions to deny reentrancy to critical transactional procedures
+that may be complex or lengthy.
+
+Transactions should be used instead of signals as semaphores, as TRAC$
+manages transactions to ensure that executive resources are not wasted
+on signal waits. The Transaction system is designed to be as simple
+and convenient as possible to encourage its use.
+
+When an Operator "posts" a transaction, it is guaranteed exclusivity
+until the transaction is "committed". During a transaction, XERIS calls
+are rejected.
+
+Transactions should be limited to the immediate critical
+section. Transactions may also be chained, in that separate critical
+sections may share a Signal object for more complex transaction
+synchronization.
+
+Transaction service requests have four possible failure modes:
+1. Signal Pointer is invalid                  ([RJT] OP_F_CB_CONFIG)
+2. Signal token overflow                      ([UNA] OP_F_OVERFLOW)
+3. Signal > 0, but no transaction queue found ([UNA] OP_F_SIGNAL_ERROR)
+4. Wait return without token                  ([UNA] OP_F_PROC_VIOL)
+
+A Signal Token Overflow condition is theoretically very rare, and
+would require over 65,000 simultaneous attempts to enter the same
+transaction. This would likely only be caused by recursion, which is
+theoretically impossible given that transactions cannot be
+nested. However in case of this extremely unlikely event, the
+transaction will be rejected. Programs shall always ensure they
+receive a COMPLETE report before executing a transaction.
+
+A Signal Error could be caused by either serious system errors such
+as stack excursion events, or memory collisions. They can also be
+caused by improper signal object assignment. A signal error indicates
+that the transaction can not be secured on the provided signal.
+
+
+If a transaction is posted before another is commuted (a re-entry
+attempt is made), TRAC$ will queue the transaction and command OPSEC%
+to work on the first dispatch in that transaction queue.
+
+There are four basic signaling services available:
+
+SVC   Code Name  Colloquial Name   Description
+00    TX_POST    Post              Enter critical section
+01    TX_COMT    Commit            Exit critical section
